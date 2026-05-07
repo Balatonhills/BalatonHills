@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -13,6 +13,12 @@ const nav = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = pathname === "/";
+  // On the home page we overlay the hero video, so the header stays transparent
+  // until the user scrolls. Every other route has a light background, so the
+  // header must always be solid or the white nav text becomes invisible.
+  const solid = !isHome || scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -24,7 +30,7 @@ export function Header() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
+        solid
           ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm"
           : "bg-transparent"
       }`}
@@ -34,7 +40,7 @@ export function Header() {
           <img
             src={logo}
             alt="Balaton Hills Golf Club"
-            className={`h-14 w-auto transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+            className={`h-14 w-auto transition-all ${solid ? "" : "brightness-0 invert"}`}
           />
         </Link>
 
@@ -45,7 +51,7 @@ export function Header() {
               to={item.to}
               activeProps={{ className: "text-gold" }}
               className={`text-sm tracking-wider uppercase transition-colors hover:text-gold ${
-                scrolled ? "text-foreground" : "text-background"
+                solid ? "text-foreground" : "text-background"
               }`}
             >
               {item.label}
@@ -60,7 +66,7 @@ export function Header() {
         </nav>
 
         <button
-          className={`lg:hidden p-2 ${scrolled ? "text-foreground" : "text-background"}`}
+          className={`lg:hidden p-2 ${solid ? "text-foreground" : "text-background"}`}
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
