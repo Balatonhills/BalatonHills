@@ -45,15 +45,7 @@ function Index() {
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/80" />
           <div className="relative z-10 flex h-full flex-col items-center justify-center text-center px-6">
-            <span className="eyebrow text-gold">Est. on the shores of Lake Balaton</span>
-            <h1 className="mt-6 font-display text-5xl sm:text-7xl md:text-8xl text-background max-w-5xl leading-[1.05]">
-              Where the lake meets <em className="italic text-gold">the links</em>
-            </h1>
-            <p className="mt-8 max-w-xl text-background/85 text-lg leading-relaxed">
-              Two championship courses, one timeless estate. A heritage of
-              hospitality in the heart of the Balaton Uplands.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/booking"
                 className="inline-flex items-center justify-center bg-gold text-gold-foreground px-8 py-4 text-xs tracking-[0.25em] uppercase font-medium hover:bg-gold/90 transition-colors"
