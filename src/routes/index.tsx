@@ -65,22 +65,6 @@ function Index() {
           </div>
         </section>
 
-        {/* Intro */}
-        <section className="py-32 container-prose text-center">
-          <span className="eyebrow">A Hungarian Heritage</span>
-          <h2 className="mt-6 font-display text-4xl md:text-6xl max-w-4xl mx-auto leading-tight">
-            A sanctuary of sport, set within one of Europe's most storied landscapes.
-          </h2>
-          <div className="mt-8 flex justify-center">
-            <span className="gold-rule" />
-          </div>
-          <p className="mt-8 max-w-2xl mx-auto text-lg text-muted-foreground leading-relaxed">
-            Balaton Hills marries the sweeping topography of the Káli Basin with
-            the meticulous traditions of championship golf — a private estate
-            where every fairway tells a story.
-          </p>
-        </section>
-
         {/* Courses */}
         <section className="py-24 bg-secondary/40">
           <div className="container-prose">
