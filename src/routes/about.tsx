@@ -7,7 +7,7 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — Balaton Hills" },
-      { name: "description", content: "The story of Balaton Hills Estate & Links — a Hungarian sanctuary for the game of golf." },
+      { name: "description", content: "The story of Balaton Hills Golf Club — a Hungarian sanctuary for the game of golf." },
       { property: "og:title", content: "About — Balaton Hills" },
       { property: "og:description", content: "Our story, our setting, our standards." },
       { property: "og:image", content: clubhouse },

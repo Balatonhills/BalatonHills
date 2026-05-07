@@ -9,13 +9,13 @@ import hillside from "@/assets/course-hillside.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Balaton Hills Estate & Links — Premium Golf in Hungary" },
+      { title: "Balaton Hills Golf Club — Premium Golf in Hungary" },
       {
         name: "description",
         content:
           "Two championship golf courses set between the vineyards of the Balaton Uplands and the silver waters of Lake Balaton.",
       },
-      { property: "og:title", content: "Balaton Hills Estate & Links" },
+      { property: "og:title", content: "Balaton Hills Golf Club" },
       { property: "og:description", content: "Premium golf at Lake Balaton, Hungary." },
       { property: "og:image", content: heroPoster },
     ],
