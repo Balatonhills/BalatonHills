@@ -70,9 +70,7 @@ function Index() {
           <div className="container-prose">
             <div className="text-center mb-16">
               <span className="eyebrow">Two Distinctive Courses</span>
-              <h2 className="mt-4 font-display text-4xl md:text-5xl">
-                Forest Hills & Vadrósza
-              </h2>
+              <h2 className="mt-4 font-display text-4xl md:text-5xl">Forest Hills & Vadrósza</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-8">
               <CourseCard

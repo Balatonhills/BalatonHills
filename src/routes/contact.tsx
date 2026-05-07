@@ -22,7 +22,9 @@ function ContactPage() {
         <section className="container-prose text-center pb-16">
           <span className="eyebrow">Contact</span>
           <h1 className="mt-6 font-display text-5xl md:text-7xl">Find Us at the Lake</h1>
-          <div className="mt-8 flex justify-center"><span className="gold-rule" /></div>
+          <div className="mt-8 flex justify-center">
+            <span className="gold-rule" />
+          </div>
         </section>
         <section className="container-prose pb-24 grid md:grid-cols-3 gap-8 text-center">
           {[

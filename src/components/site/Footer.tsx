@@ -7,20 +7,30 @@ export function Footer() {
       <div className="container-prose py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="Balaton Hills Golf Club" className="h-16 w-auto brightness-0 invert" />
+            <img
+              src={logo}
+              alt="Balaton Hills Golf Club"
+              className="h-16 w-auto brightness-0 invert"
+            />
           </div>
           <p className="mt-6 max-w-md text-sm text-primary-foreground/70 leading-relaxed">
-            Two championship courses set between the rolling vineyards of the
-            Balaton Uplands and the silver waters of Hungary's largest lake.
+            Two championship courses set between the rolling vineyards of the Balaton Uplands and
+            the silver waters of Hungary's largest lake.
           </p>
         </div>
 
         <div>
           <h4 className="text-xs tracking-[0.25em] uppercase text-gold mb-4">Visit</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/80">
-            <li><Link to="/courses">Our Courses</Link></li>
-            <li><Link to="/membership">Membership</Link></li>
-            <li><Link to="/booking">Book a Tee Time</Link></li>
+            <li>
+              <Link to="/courses">Our Courses</Link>
+            </li>
+            <li>
+              <Link to="/membership">Membership</Link>
+            </li>
+            <li>
+              <Link to="/booking">Book a Tee Time</Link>
+            </li>
           </ul>
         </div>
 

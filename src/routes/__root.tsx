@@ -74,12 +74,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Balaton Hills Golf Club" },
       { name: "description", content: "Premium golf at Lake Balaton, Hungary." },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Balaton Hills Golf Club" },
       { property: "og:title", content: "Balaton Hills Golf Club" },
       { property: "og:description", content: "Premium golf at Lake Balaton, Hungary." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

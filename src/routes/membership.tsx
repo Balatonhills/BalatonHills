@@ -18,17 +18,32 @@ const tiers = [
   {
     name: "Estate Member",
     price: "On Application",
-    perks: ["Unlimited play, both courses", "Reciprocal rights worldwide", "Reserved locker & bag storage", "Priority restaurant reservations"],
+    perks: [
+      "Unlimited play, both courses",
+      "Reciprocal rights worldwide",
+      "Reserved locker & bag storage",
+      "Priority restaurant reservations",
+    ],
   },
   {
     name: "Country Member",
     price: "On Application",
-    perks: ["Unlimited weekday play", "30 weekend rounds annually", "Member-rate guest invitations", "Clubhouse privileges"],
+    perks: [
+      "Unlimited weekday play",
+      "30 weekend rounds annually",
+      "Member-rate guest invitations",
+      "Clubhouse privileges",
+    ],
   },
   {
     name: "Junior Member",
     price: "On Application",
-    perks: ["For players under 25", "Full course access", "Coaching programme included", "Junior tournament entry"],
+    perks: [
+      "For players under 25",
+      "Full course access",
+      "Coaching programme included",
+      "Junior tournament entry",
+    ],
   },
 ];
 
@@ -40,11 +55,12 @@ function MembershipPage() {
         <section className="container-prose text-center pb-16">
           <span className="eyebrow">Private Membership</span>
           <h1 className="mt-6 font-display text-5xl md:text-7xl">A Place to Belong</h1>
-          <div className="mt-8 flex justify-center"><span className="gold-rule" /></div>
+          <div className="mt-8 flex justify-center">
+            <span className="gold-rule" />
+          </div>
           <p className="mt-8 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Membership at Balaton Hills is offered by invitation and recommendation —
-            an enduring connection to the estate, the courses, and a community
-            of likeminded players.
+            Membership at Balaton Hills is offered by invitation and recommendation — an enduring
+            connection to the estate, the courses, and a community of likeminded players.
           </p>
         </section>
         <section className="container-prose pb-24 grid md:grid-cols-3 gap-6">
@@ -54,7 +70,10 @@ function MembershipPage() {
               <div className="mt-2 text-xs tracking-[0.25em] uppercase text-gold">{t.price}</div>
               <ul className="mt-8 space-y-3 text-sm text-muted-foreground">
                 {t.perks.map((p) => (
-                  <li key={p} className="flex gap-3"><span className="text-gold">—</span>{p}</li>
+                  <li key={p} className="flex gap-3">
+                    <span className="text-gold">—</span>
+                    {p}
+                  </li>
                 ))}
               </ul>
             </div>
