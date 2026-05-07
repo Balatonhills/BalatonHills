@@ -6,7 +6,7 @@ export const Route = createFileRoute("/membership")({
   head: () => ({
     meta: [
       { title: "Membership — Balaton Hills" },
-      { name: "description", content: "Private membership at Balaton Hills Estate & Links." },
+      { name: "description", content: "Private membership at Balaton Hills Golf Club." },
       { property: "og:title", content: "Membership — Balaton Hills" },
       { property: "og:description", content: "Private membership at Balaton Hills." },
     ],
