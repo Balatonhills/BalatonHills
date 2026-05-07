@@ -31,8 +31,8 @@ function BookingPage() {
 
         <section className="container-prose grid md:grid-cols-2 gap-8">
           {[
-            { name: "The Lakeside Links", stats: "18 · Par 72" },
-            { name: "The Hillside Estate", stats: "18 · Par 71" },
+            { name: "Forest Hills", stats: "18 Tees · 9 Greens · Par 70" },
+            { name: "Vadrósza", stats: "9 Holes · Par 33" },
           ].map((c) => (
             <div key={c.name} className="border border-border bg-card p-10">
               <div className="text-[0.65rem] tracking-[0.3em] uppercase text-gold">{c.stats}</div>

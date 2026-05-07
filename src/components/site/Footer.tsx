@@ -24,7 +24,6 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-primary-foreground/80">
             <li><Link to="/courses">Our Courses</Link></li>
             <li><Link to="/membership">Membership</Link></li>
-            <li><Link to="/restaurant">Restaurant</Link></li>
             <li><Link to="/booking">Book a Tee Time</Link></li>
           </ul>
         </div>
