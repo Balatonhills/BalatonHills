@@ -16,6 +16,7 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Premium golf at Lake Balaton, Hungary." },
       { property: "og:image", content: heroPoster },
     ],
+    links: [{ rel: "canonical", href: "https://www.balatonhills.com/" }],
   }),
   component: Index,
 });

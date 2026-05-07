@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -21,13 +21,17 @@ export const Route = createFileRoute("/booking")({
       { property: "og:title", content: "Book a Tee Time — Balaton Hills" },
       { property: "og:description", content: "Reserve a tee time at Balaton Hills." },
     ],
+    links: [{ rel: "canonical", href: "https://www.balatonhills.com/booking" }],
   }),
   component: BookingPage,
 });
 
 const GOLFIGO_SRC = "https://api.golfigo.com/widget/";
+const GOLFIGO_TIMEOUT_MS = 10_000;
 
 function GolfigoTeeSheet({ clubId, id }: { clubId: number; id: number }) {
+  const [failed, setFailed] = useState(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -36,7 +40,19 @@ function GolfigoTeeSheet({ clubId, id }: { clubId: number; id: number }) {
       return;
     }
 
-    if (document.querySelector(`script[src="${GOLFIGO_SRC}"]`)) return;
+    let loaded = false;
+    const markLoaded = () => {
+      loaded = true;
+    };
+
+    const timeout = window.setTimeout(() => {
+      if (!loaded) setFailed(true);
+    }, GOLFIGO_TIMEOUT_MS);
+
+    if (document.querySelector(`script[src="${GOLFIGO_SRC}"]`)) {
+      // Another mount is already loading the script; wait for it via timeout above.
+      return () => window.clearTimeout(timeout);
+    }
 
     window.golfigoWidget = {
       widget: {
@@ -51,10 +67,33 @@ function GolfigoTeeSheet({ clubId, id }: { clubId: number; id: number }) {
     script.src = GOLFIGO_SRC;
     script.async = true;
     script.onload = () => {
+      markLoaded();
       window.golfigoWidget?.load?.("teeSheet", { club_id: clubId, id });
     };
+    script.onerror = () => setFailed(true);
     document.head.appendChild(script);
+
+    return () => window.clearTimeout(timeout);
   }, [clubId, id]);
+
+  if (failed) {
+    return (
+      <div className="min-h-[24rem] bg-secondary/40 border border-border p-8 text-center flex flex-col items-center justify-center">
+        <div className="text-xs tracking-[0.3em] uppercase text-gold">Booking unavailable</div>
+        <p className="mt-3 text-sm text-muted-foreground max-w-sm">
+          Our online booking is temporarily unreachable. Please call{" "}
+          <a className="text-foreground underline" href="tel:+3610000000">
+            +36 1 000 0000
+          </a>{" "}
+          or email{" "}
+          <a className="text-foreground underline" href="mailto:welcome@balatonhills.hu">
+            welcome@balatonhills.hu
+          </a>{" "}
+          to reserve your round.
+        </p>
+      </div>
+    );
+  }
 
   return <div id="golfigo-widget" className="min-h-[24rem]" />;
 }

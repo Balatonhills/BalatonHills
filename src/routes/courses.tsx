@@ -14,6 +14,7 @@ export const Route = createFileRoute("/courses")({
       { property: "og:description", content: "Forest Hills and Vadrósza." },
       { property: "og:image", content: hillside },
     ],
+    links: [{ rel: "canonical", href: "https://www.balatonhills.com/courses" }],
   }),
   component: CoursesPage,
 });

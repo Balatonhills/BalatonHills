@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import heroPoster from "@/assets/hero-poster.jpg";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -7,7 +8,9 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Visit, write or call Balaton Hills Golf Club." },
       { property: "og:title", content: "Contact — Balaton Hills" },
       { property: "og:description", content: "Get in touch with Balaton Hills." },
+      { property: "og:image", content: heroPoster },
     ],
+    links: [{ rel: "canonical", href: "https://www.balatonhills.com/contact" }],
   }),
   component: ContactPage,
 });

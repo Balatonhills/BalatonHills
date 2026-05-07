@@ -14,6 +14,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:description", content: "Our story, our setting, our standards." },
       { property: "og:image", content: clubhouse },
     ],
+    links: [{ rel: "canonical", href: "https://www.balatonhills.com/about" }],
   }),
   component: AboutPage,
 });
