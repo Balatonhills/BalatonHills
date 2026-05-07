@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+
+declare global {
+  interface Window {
+    golfigoWidget?: {
+      widget?: { q: Array<() => void>; ready: (cb: () => void) => void };
+      load?: (kind: string, opts: { club_id: number; id: number }) => void;
+    };
+  }
+}
 
 export const Route = createFileRoute("/booking")({
   head: () => ({
@@ -16,6 +26,40 @@ export const Route = createFileRoute("/booking")({
   }),
   component: BookingPage,
 });
+
+const GOLFIGO_SRC = "https://api.golfigo.com/widget/";
+
+function GolfigoTeeSheet({ clubId, id }: { clubId: number; id: number }) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (window.golfigoWidget?.load) {
+      window.golfigoWidget.load("teeSheet", { club_id: clubId, id });
+      return;
+    }
+
+    if (document.querySelector(`script[src="${GOLFIGO_SRC}"]`)) return;
+
+    window.golfigoWidget = {
+      widget: {
+        q: [],
+        ready(cb) {
+          this.q.push(cb);
+        },
+      },
+    };
+
+    const script = document.createElement("script");
+    script.src = GOLFIGO_SRC;
+    script.async = true;
+    script.onload = () => {
+      window.golfigoWidget?.load?.("teeSheet", { club_id: clubId, id });
+    };
+    document.head.appendChild(script);
+  }, [clubId, id]);
+
+  return <div id="golfigo-widget" className="min-h-[24rem]" />;
+}
 
 function BookingPage() {
   return (
@@ -34,25 +78,32 @@ function BookingPage() {
         </section>
 
         <section className="container-prose grid md:grid-cols-2 gap-8">
-          {[
-            { name: "Forest Hills", stats: "18 Tees · 9 Greens · Par 70" },
-            { name: "Vadrósza", stats: "9 Holes · Par 33" },
-          ].map((c) => (
-            <div key={c.name} className="border border-border bg-card p-10">
-              <div className="text-[0.65rem] tracking-[0.3em] uppercase text-gold">{c.stats}</div>
-              <h2 className="mt-3 font-display text-3xl">{c.name}</h2>
-              <div className="mt-8 aspect-[4/3] bg-secondary/60 border border-dashed border-border flex items-center justify-center text-center p-8">
-                <div>
-                  <div className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
-                    Golfigo Widget
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground max-w-xs">
-                    Booking widget for {c.name} will be embedded here.
-                  </p>
+          <div className="border border-border bg-card p-10">
+            <div className="text-[0.65rem] tracking-[0.3em] uppercase text-gold">
+              18 Tees · 9 Greens · Par 70
+            </div>
+            <h2 className="mt-3 font-display text-3xl">Forest Hills</h2>
+            <div className="mt-8">
+              <GolfigoTeeSheet clubId={10} id={2} />
+            </div>
+          </div>
+
+          <div className="border border-border bg-card p-10">
+            <div className="text-[0.65rem] tracking-[0.3em] uppercase text-gold">
+              9 Holes · Par 33
+            </div>
+            <h2 className="mt-3 font-display text-3xl">Vadrósza</h2>
+            <div className="mt-8 aspect-[4/3] bg-secondary/60 border border-dashed border-border flex items-center justify-center text-center p-8">
+              <div>
+                <div className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
+                  Golfigo Widget
                 </div>
+                <p className="mt-3 text-sm text-muted-foreground max-w-xs">
+                  Booking widget for Vadrósza will be embedded here.
+                </p>
               </div>
             </div>
-          ))}
+          </div>
         </section>
       </main>
       <Footer />
