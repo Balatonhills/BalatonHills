@@ -8,10 +8,10 @@ export const Route = createFileRoute("/courses")({
   head: () => ({
     meta: [
       { title: "Our Courses — Balaton Hills" },
-      { name: "description", content: "Two championship courses: The Lakeside Links and The Hillside Estate." },
+      { name: "description", content: "Forest Hills and Vadrósza — two distinctive courses set above Lake Balaton." },
       { property: "og:title", content: "Our Courses — Balaton Hills" },
-      { property: "og:description", content: "The Lakeside Links and The Hillside Estate." },
-      { property: "og:image", content: lakeside },
+      { property: "og:description", content: "Forest Hills and Vadrósza." },
+      { property: "og:image", content: hillside },
     ],
   }),
   component: CoursesPage,
@@ -19,22 +19,22 @@ export const Route = createFileRoute("/courses")({
 
 const courses = [
   {
-    slug: "lakeside",
-    title: "The Lakeside Links",
-    eyebrow: "Signature Course",
-    stats: "18 Holes · Par 72 · 6,840 yds",
-    image: lakeside,
-    blurb:
-      "Inspired by the great links of Sunningdale and Royal Lytham, the Lakeside hugs Balaton's northern shore — fast-running fescue, deep revetted bunkers, and the ever-present whisper of the lake breeze.",
-  },
-  {
-    slug: "hillside",
-    title: "The Hillside Estate",
-    eyebrow: "Parkland Course",
-    stats: "18 Holes · Par 71 · 6,510 yds",
+    slug: "forest-hills",
+    title: "Forest Hills",
+    eyebrow: "The Championship Course",
+    stats: "18 Tees · 9 Greens · Par 70",
     image: hillside,
     blurb:
-      "A parkland routing of dramatic elevation, framed by basalt outcrops, ancient oaks and the terraced vineyards of the Káli Basin. Strategic, scenic, and quietly demanding.",
+      "Eighteen distinct tee boxes converge upon nine sculpted greens — a routing in the great tradition of double-tee design, where every green is played from two angles, and no round is ever the same.",
+  },
+  {
+    slug: "vadrosza",
+    title: "Vadrósza",
+    eyebrow: "The Short Course",
+    stats: "9 Holes · Par 33",
+    image: lakeside,
+    blurb:
+      "Named for the wild rose that blooms across the Balaton Uplands. Nine elegant holes threading meadow and woodland — a place to sharpen the short game, or simply walk the land at golden hour.",
   },
 ];
 
@@ -65,7 +65,7 @@ function CoursesPage() {
                 <h2 className="mt-4 font-display text-4xl md:text-5xl">{c.title}</h2>
                 <div className="mt-3 text-sm tracking-[0.25em] uppercase text-muted-foreground">{c.stats}</div>
                 <p className="mt-6 text-lg text-muted-foreground leading-relaxed">{c.blurb}</p>
-                <div className="mt-8 flex gap-4">
+                <div className="mt-8 flex flex-wrap gap-4">
                   <Link to="/booking" className="bg-primary text-primary-foreground px-6 py-3 text-xs tracking-[0.25em] uppercase">
                     Book this Course
                   </Link>

@@ -93,23 +93,23 @@ function Index() {
         <section className="py-24 bg-secondary/40">
           <div className="container-prose">
             <div className="text-center mb-16">
-              <span className="eyebrow">Two Championship Courses</span>
+              <span className="eyebrow">Two Distinctive Courses</span>
               <h2 className="mt-4 font-display text-4xl md:text-5xl">
-                The Estate & The Links
+                Forest Hills & Vadrósza
               </h2>
             </div>
             <div className="grid md:grid-cols-2 gap-8">
               <CourseCard
-                title="The Lakeside Links"
-                subtitle="18 Holes · Par 72 · 6,840 yds"
-                description="A windswept tribute to the great links of the British Isles, hugging the northern shore of Lake Balaton."
-                image={lakeside}
+                title="Forest Hills"
+                subtitle="18 Tees · 9 Greens · Par 70"
+                description="Our championship routing — eighteen tee boxes converging on nine sculpted greens, in the classic tradition of double-tee design."
+                image={hillside}
               />
               <CourseCard
-                title="The Hillside Estate"
-                subtitle="18 Holes · Par 71 · 6,510 yds"
-                description="A parkland masterpiece carved through ancient oaks and the terraced vineyards of the Balaton Uplands."
-                image={hillside}
+                title="Vadrósza"
+                subtitle="9 Holes · Par 33"
+                description="Nine elegant holes threading meadow and woodland — named for the wild rose of the Balaton Uplands."
+                image={lakeside}
               />
             </div>
           </div>
