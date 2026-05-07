@@ -7,11 +7,7 @@ export function Footer() {
       <div className="container-prose py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="Balaton Hills" className="h-14 w-14 rounded-full ring-1 ring-gold/40" />
-            <div>
-              <div className="font-display text-2xl">Balaton Hills</div>
-              <div className="text-[0.65rem] tracking-[0.3em] uppercase text-gold">Estate & Links</div>
-            </div>
+            <img src={logo} alt="Balaton Hills Golf Club" className="h-16 w-auto brightness-0 invert" />
           </div>
           <p className="mt-6 max-w-md text-sm text-primary-foreground/70 leading-relaxed">
             Two championship courses set between the rolling vineyards of the
@@ -39,7 +35,7 @@ export function Footer() {
       </div>
       <div className="border-t border-primary-foreground/10">
         <div className="container-prose py-6 text-xs text-primary-foreground/60 flex flex-col sm:flex-row justify-between gap-2">
-          <span>© {new Date().getFullYear()} Balaton Hills Estate & Links</span>
+          <span>© {new Date().getFullYear()} Balaton Hills Golf Club</span>
           <span className="tracking-widest uppercase">Established in the spirit of tradition</span>
         </div>
       </div>

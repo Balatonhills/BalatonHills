@@ -31,15 +31,11 @@ export function Header() {
     >
       <div className="container-prose flex h-20 items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="Balaton Hills Estate & Links" className="h-12 w-12 rounded-full ring-1 ring-gold/40" />
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className={`font-display text-lg ${scrolled ? "text-foreground" : "text-background"}`}>
-              Balaton Hills
-            </span>
-            <span className={`text-[0.65rem] tracking-[0.3em] uppercase ${scrolled ? "text-muted-foreground" : "text-background/80"}`}>
-              Estate & Links
-            </span>
-          </div>
+          <img
+            src={logo}
+            alt="Balaton Hills Golf Club"
+            className={`h-14 w-auto transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+          />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-8">
