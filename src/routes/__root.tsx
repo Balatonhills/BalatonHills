@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Footer";
 
 function NotFoundComponent() {
   return (
@@ -115,7 +117,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Header />
       <Outlet />
+      <Footer />
     </QueryClientProvider>
   );
 }

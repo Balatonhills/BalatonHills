@@ -1,7 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Header } from "@/components/site/Header";
-import { Footer } from "@/components/site/Footer";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import heroPoster from "@/assets/hero-poster.jpg";
 import lakeside from "@/assets/course-lakeside.jpg";
 import hillside from "@/assets/course-hillside.jpg";
@@ -29,7 +26,6 @@ const HERO_VIDEO =
 function Index() {
   return (
     <>
-      <Header />
       <main>
         {/* Hero */}
         <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
@@ -108,7 +104,6 @@ function Index() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }
