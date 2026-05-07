@@ -1,17 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import heroPoster from "@/assets/hero-poster.jpg";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact — Balaton Hills" },
-      { name: "description", content: "Visit, write or call Balaton Hills Golf Club." },
-      { property: "og:title", content: "Contact — Balaton Hills" },
-      { property: "og:description", content: "Get in touch with Balaton Hills." },
-      { property: "og:image", content: heroPoster },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/contact" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/contact") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "Contact — Balaton Hills" },
+        {
+          name: "description",
+          content: m?.description ?? "Visit, write or call Balaton Hills Golf Club.",
+        },
+        { property: "og:title", content: m?.og_title ?? "Contact — Balaton Hills" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Get in touch with Balaton Hills.",
+        },
+        { property: "og:image", content: m?.og_image ?? heroPoster },
+      ],
+      links: [{ rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/contact" }],
+    };
+  },
   component: ContactPage,
 });
 

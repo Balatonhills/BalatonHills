@@ -10,19 +10,30 @@ declare global {
   }
 }
 
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
+
 export const Route = createFileRoute("/booking")({
-  head: () => ({
-    meta: [
-      { title: "Book a Tee Time — Balaton Hills" },
-      {
-        name: "description",
-        content: "Reserve a tee time on The Lakeside Links or The Hillside Estate.",
-      },
-      { property: "og:title", content: "Book a Tee Time — Balaton Hills" },
-      { property: "og:description", content: "Reserve a tee time at Balaton Hills." },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/booking" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/booking") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "Book a Tee Time — Balaton Hills" },
+        {
+          name: "description",
+          content:
+            m?.description ?? "Reserve a tee time on The Lakeside Links or The Hillside Estate.",
+        },
+        { property: "og:title", content: m?.og_title ?? "Book a Tee Time — Balaton Hills" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Reserve a tee time at Balaton Hills.",
+        },
+        ...(m?.og_image ? [{ property: "og:image", content: m.og_image }] : []),
+      ],
+      links: [{ rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/booking" }],
+    };
+  },
   component: BookingPage,
 });
 

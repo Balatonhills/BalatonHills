@@ -2,22 +2,31 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import heroPoster from "@/assets/hero-poster.jpg";
 import lakeside from "@/assets/course-lakeside.jpg";
 import hillside from "@/assets/course-hillside.jpg";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Balaton Hills Golf Club — Premium Golf in Hungary" },
-      {
-        name: "description",
-        content:
-          "Two championship golf courses set between the vineyards of the Balaton Uplands and the silver waters of Lake Balaton.",
-      },
-      { property: "og:title", content: "Balaton Hills Golf Club" },
-      { property: "og:description", content: "Premium golf at Lake Balaton, Hungary." },
-      { property: "og:image", content: heroPoster },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "Balaton Hills Golf Club — Premium Golf in Hungary" },
+        {
+          name: "description",
+          content:
+            m?.description ??
+            "Two championship golf courses set between the vineyards of the Balaton Uplands and the silver waters of Lake Balaton.",
+        },
+        { property: "og:title", content: m?.og_title ?? "Balaton Hills Golf Club" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Premium golf at Lake Balaton, Hungary.",
+        },
+        { property: "og:image", content: m?.og_image ?? heroPoster },
+      ],
+      links: [{ rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/" }],
+    };
+  },
   component: Index,
 });
 

@@ -1,21 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import lakeside from "@/assets/course-lakeside.jpg";
 import hillside from "@/assets/course-hillside.jpg";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/courses")({
-  head: () => ({
-    meta: [
-      { title: "Our Courses — Balaton Hills" },
-      {
-        name: "description",
-        content: "Forest Hills and Vadrósza — two distinctive courses set above Lake Balaton.",
-      },
-      { property: "og:title", content: "Our Courses — Balaton Hills" },
-      { property: "og:description", content: "Forest Hills and Vadrósza." },
-      { property: "og:image", content: hillside },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/courses" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/courses") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "Our Courses — Balaton Hills" },
+        {
+          name: "description",
+          content:
+            m?.description ??
+            "Forest Hills and Vadrósza — two distinctive courses set above Lake Balaton.",
+        },
+        { property: "og:title", content: m?.og_title ?? "Our Courses — Balaton Hills" },
+        { property: "og:description", content: m?.og_description ?? "Forest Hills and Vadrósza." },
+        { property: "og:image", content: m?.og_image ?? hillside },
+      ],
+      links: [{ rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/courses" }],
+    };
+  },
   component: CoursesPage,
 });
 

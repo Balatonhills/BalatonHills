@@ -1,21 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import clubhouse from "@/assets/clubhouse.jpg";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — Balaton Hills" },
-      {
-        name: "description",
-        content:
-          "The story of Balaton Hills Golf Club — a Hungarian sanctuary for the game of golf.",
-      },
-      { property: "og:title", content: "About — Balaton Hills" },
-      { property: "og:description", content: "Our story, our setting, our standards." },
-      { property: "og:image", content: clubhouse },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/about" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/about") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "About — Balaton Hills" },
+        {
+          name: "description",
+          content:
+            m?.description ??
+            "The story of Balaton Hills Golf Club — a Hungarian sanctuary for the game of golf.",
+        },
+        { property: "og:title", content: m?.og_title ?? "About — Balaton Hills" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Our story, our setting, our standards.",
+        },
+        { property: "og:image", content: m?.og_image ?? clubhouse },
+      ],
+      links: [{ rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/about" }],
+    };
+  },
   component: AboutPage,
 });
 

@@ -11,13 +11,15 @@ const routes = [
   () => import("./contact"),
   () => import("./courses"),
   () => import("./membership"),
+  () => import("./admin"),
+  () => import("./admin.login"),
 ];
 
 describe("route modules", () => {
   it.each(routes)("loads route module #%# and exposes a valid Route", async (load) => {
     const mod = await load();
     expect(mod.Route).toBeDefined();
-    const head = mod.Route.options.head?.({} as never);
+    const head = await mod.Route.options.head?.({} as never);
     expect(head?.meta?.length).toBeGreaterThan(0);
     expect(mod.Route.options.component).toBeTypeOf("function");
   });

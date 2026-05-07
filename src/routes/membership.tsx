@@ -1,17 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import heroPoster from "@/assets/hero-poster.jpg";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/membership")({
-  head: () => ({
-    meta: [
-      { title: "Membership — Balaton Hills" },
-      { name: "description", content: "Private membership at Balaton Hills Golf Club." },
-      { property: "og:title", content: "Membership — Balaton Hills" },
-      { property: "og:description", content: "Private membership at Balaton Hills." },
-      { property: "og:image", content: heroPoster },
-    ],
-    links: [{ rel: "canonical", href: "https://www.balatonhills.com/membership" }],
-  }),
+  loader: async () => ({ meta: await getMetadata("/membership") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { title: m?.title ?? "Membership — Balaton Hills" },
+        {
+          name: "description",
+          content: m?.description ?? "Private membership at Balaton Hills Golf Club.",
+        },
+        { property: "og:title", content: m?.og_title ?? "Membership — Balaton Hills" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Private membership at Balaton Hills.",
+        },
+        { property: "og:image", content: m?.og_image ?? heroPoster },
+      ],
+      links: [
+        { rel: "canonical", href: m?.canonical ?? "https://www.balatonhills.com/membership" },
+      ],
+    };
+  },
   component: MembershipPage,
 });
 

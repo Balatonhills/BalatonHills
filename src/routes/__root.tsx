@@ -3,6 +3,7 @@ import {
   Link,
   createRootRoute,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -10,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { getMetadata, type RouteMetadata } from "@/lib/site-metadata";
 
 function NotFoundComponent() {
   return (
@@ -69,29 +71,39 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Balaton Hills Golf Club" },
-      { name: "description", content: "Premium golf at Lake Balaton, Hungary." },
-      { name: "author", content: "Balaton Hills Golf Club" },
-      { property: "og:title", content: "Balaton Hills Golf Club" },
-      { property: "og:description", content: "Premium golf at Lake Balaton, Hungary." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap",
-      },
-    ],
-  }),
+  loader: async () => ({ meta: await getMetadata("__root__") }),
+  head: (ctx?: { loaderData?: { meta?: RouteMetadata } }) => {
+    const m = ctx?.loaderData?.meta;
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: m?.title ?? "Balaton Hills Golf Club" },
+        {
+          name: "description",
+          content: m?.description ?? "Premium golf at Lake Balaton, Hungary.",
+        },
+        { name: "author", content: "Balaton Hills Golf Club" },
+        { property: "og:title", content: m?.og_title ?? "Balaton Hills Golf Club" },
+        {
+          property: "og:description",
+          content: m?.og_description ?? "Premium golf at Lake Balaton, Hungary.",
+        },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap",
+        },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -113,11 +125,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
   return (
     <>
-      <Header />
+      {!isAdmin && <Header />}
       <Outlet />
-      <Footer />
+      {!isAdmin && <Footer />}
     </>
   );
 }
