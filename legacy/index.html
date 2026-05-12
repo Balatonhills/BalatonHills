@@ -110,25 +110,50 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-24 bg-stone-100">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16">
-            <div>
-                <h2 class="text-4xl mb-6">Contact Us</h2>
-                <p class="mb-8 text-stone-600">Have questions about the course or our facilities? Reach out to our team.</p>
-                <div class="space-y-4">
-                    <p><strong>Address:</strong> [Street Name], Balaton Hills, Hungary</p>
+    <!-- Contact Section -->
+<section id="contact" class="py-24 bg-stone-100">
+    <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-4xl mb-12 text-center">Contact Us</h2>
+        
+        <!-- Grid Container: 3 Columns on large screens, 1 on mobile -->
+        <div class="grid lg:grid-cols-3 gap-12 items-start">
+            
+            <!-- Column 1: Info -->
+            <div class="space-y-6">
+                <h3 class="text-2xl font-semibold text-emerald-900">Get in Touch</h3>
+                <p class="text-stone-600">Have questions about the course or our facilities? Reach out to our team.</p>
+                <div class="space-y-4 text-sm">
+                    <p><strong>Address:</strong> Nagymező út 33-34, 8246 Tótvázsony, Hungary</p>
                     <p><strong>Phone:</strong> +36 [Your Phone Number]</p>
                     <p><strong>Email:</strong> info@vadrozsagolf.hu</p>
-                    <div class="w-full h-96 rounded-lg overflow-hidden shadow-inner border border-stone-200">
-    <iframe 
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2729.474023769947!2d17.771391512398516!3d47.00543632943265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476998a78ce2276b%3A0x140d358c449c1e1!2zVmFkcsOzenNhIEdvbGYgQ2x1Yg!5e0!3m2!1sen!2shu!4v1715518000000!5m2!1sen!2shu" 
-        width="100%" 
-        height="100%" 
-        style="border:0;" 
-        allowfullscreen="" 
-        loading="lazy" 
-        referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
+                </div>
+            </div>
+
+            <!-- Column 2: The Map -->
+            <div class="h-80 lg:h-full min-h-[350px] rounded-xl overflow-hidden shadow-md border border-white">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2729.474023769947!2d17.771391512398516!3d47.00543632943265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476998a78ce2276b%3A0x140d358c449c1e1!2zVmFkcsOzenNhIEdvbGYgQ2x1Yg!5e0!3m2!1sen!2shu!4v1715518000000!5m2!1sen!2shu" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            </div>
+
+            <!-- Column 3: The Form -->
+            <form class="space-y-4 bg-white p-6 rounded-xl shadow-sm">
+                <input type="text" placeholder="Name" class="w-full p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <input type="email" placeholder="Email" class="w-full p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <textarea placeholder="Message" rows="4" class="w-full p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                <button class="w-full bg-emerald-900 text-white py-3 rounded-lg uppercase tracking-widest text-xs hover:bg-emerald-800 transition-colors">
+                    Send Message
+                </button>
+            </form>
+            
+        </div>
+    </div>
+</section>
 </div>
                 </div>
             </div>
