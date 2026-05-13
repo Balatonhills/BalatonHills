@@ -46,6 +46,9 @@ function AdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("admin page mounted, auth status:", auth.status);
+    }
     if (auth.status === "anon") {
       navigate({ to: "/admin/login", replace: true });
     }
@@ -53,8 +56,16 @@ function AdminPage() {
 
   if (auth.status !== "authed") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          {auth.status === "loading" ? "Loading…" : "Redirecting…"}
+        </p>
+        <a
+          href="/admin/login"
+          className="text-xs uppercase tracking-[0.2em] text-foreground underline decoration-muted-foreground underline-offset-4 hover:decoration-foreground"
+        >
+          Go to sign in →
+        </a>
       </main>
     );
   }
