@@ -15,6 +15,7 @@ const routes = [
   () => import("./admin.index"),
   () => import("./admin.login"),
   () => import("./admin.metadata"),
+  () => import("./admin.memberships"),
 ];
 
 describe("route modules", () => {

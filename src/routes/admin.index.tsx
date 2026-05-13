@@ -22,9 +22,10 @@ const MODULES: ReadonlyArray<Module> = [
     status: "live",
   },
   {
+    to: "/admin/memberships",
     title: "Memberships",
     description: "Tier names, perks, and pricing shown on the public membership page.",
-    status: "soon",
+    status: "live",
   },
   {
     title: "Members",

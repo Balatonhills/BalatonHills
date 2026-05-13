@@ -12,6 +12,7 @@ export const Route = createFileRoute("/admin")({
 const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; exact?: boolean }> = [
   { to: "/admin", label: "Overview", exact: true },
   { to: "/admin/metadata", label: "Site content" },
+  { to: "/admin/memberships", label: "Memberships" },
 ];
 
 function AdminLayout() {
