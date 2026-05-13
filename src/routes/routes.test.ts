@@ -12,7 +12,9 @@ const routes = [
   () => import("./courses"),
   () => import("./membership"),
   () => import("./admin"),
+  () => import("./admin.index"),
   () => import("./admin.login"),
+  () => import("./admin.metadata"),
 ];
 
 describe("route modules", () => {

@@ -16,6 +16,8 @@ import { Route as BookingRouteImport } from './routes/booking'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminMetadataRouteImport } from './routes/admin.metadata'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const MembershipRoute = MembershipRouteImport.update({
@@ -53,6 +55,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMetadataRoute = AdminMetadataRouteImport.update({
+  id: '/metadata',
+  path: '/metadata',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -68,16 +80,19 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/metadata': typeof AdminMetadataRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/metadata': typeof AdminMetadataRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +104,8 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/metadata': typeof AdminMetadataRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,16 +118,19 @@ export interface FileRouteTypes {
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/metadata'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/booking'
     | '/contact'
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/metadata'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -121,6 +141,8 @@ export interface FileRouteTypes {
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/metadata'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +206,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/metadata': {
+      id: '/admin/metadata'
+      path: '/metadata'
+      fullPath: '/admin/metadata'
+      preLoaderRoute: typeof AdminMetadataRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -196,10 +232,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMetadataRoute: typeof AdminMetadataRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
+  AdminMetadataRoute: AdminMetadataRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
