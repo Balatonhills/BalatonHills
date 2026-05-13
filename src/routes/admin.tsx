@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { signOut, useAuthSession } from "@/lib/admin-auth";
 import { getSupabase } from "@/lib/supabase";
@@ -42,17 +42,18 @@ function rowToForm(row: RouteMetadata | undefined): FormState {
 }
 
 function AdminPage() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const auth = useAuthSession();
   const navigate = useNavigate();
+  const onAdminIndex = pathname === "/admin" || pathname === "/admin/";
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      console.log("admin page mounted, auth status:", auth.status);
-    }
-    if (auth.status === "anon") {
+    if (onAdminIndex && auth.status === "anon") {
       navigate({ to: "/admin/login", replace: true });
     }
-  }, [auth.status, navigate]);
+  }, [onAdminIndex, auth.status, navigate]);
+
+  if (!onAdminIndex) return <Outlet />;
 
   if (auth.status !== "authed") {
     return (
