@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { listAllTiers, type MembershipTier } from "@/lib/membership-tiers";
 import { listMembers, MEMBER_STATUSES, type Member, type MemberStatus } from "@/lib/members";
@@ -7,8 +7,15 @@ export const Route = createFileRoute("/admin/members")({
   head: () => ({
     meta: [{ title: "Members — Admin" }, { name: "robots", content: "noindex, nofollow" }],
   }),
-  component: MembersListPage,
+  component: MembersPage,
 });
+
+function MembersPage() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onIndex = pathname === "/admin/members" || pathname === "/admin/members/";
+  if (!onIndex) return <Outlet />;
+  return <MembersListPage />;
+}
 
 function MembersListPage() {
   const [members, setMembers] = useState<Member[]>([]);

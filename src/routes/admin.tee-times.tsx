@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { listMembers, type Member } from "@/lib/members";
 import {
@@ -38,6 +38,13 @@ function eachDayInRange(from: string, to: string): string[] {
 }
 
 function TeeTimesPage() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onIndex = pathname === "/admin/tee-times" || pathname === "/admin/tee-times/";
+  if (!onIndex) return <Outlet />;
+  return <TeeSheet />;
+}
+
+function TeeSheet() {
   const today = isoDate(new Date());
   const [course, setCourse] = useState<string>(TEE_TIME_COURSES[0].slug);
   const [from, setFrom] = useState(today);
@@ -293,7 +300,6 @@ function OpenCell({ slotISO, courseSlug }: { slotISO: string; courseSlug: string
   return (
     <a
       href={href}
-      onClick={() => console.log("[tee-sheet] click open", { href })}
       className="flex cursor-pointer items-center justify-between gap-2 bg-emerald-50 px-3 py-2 text-sm transition-colors hover:bg-emerald-100"
     >
       <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
@@ -331,7 +337,6 @@ function BookedCell({
   return (
     <a
       href={href}
-      onClick={() => console.log("[tee-sheet] click booked", { href, id: row.id })}
       className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm transition-colors ${bg} ${dim}`}
     >
       <span className="flex items-baseline gap-2">
