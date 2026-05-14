@@ -275,7 +275,7 @@ function BandColumn({
       <div className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
         {first} – {last}
       </div>
-      <ul className="divide-y divide-input border border-input">
+      <div className="divide-y divide-input border border-input">
         {slots.map((slotISO) => {
           const row = occupied.get(slotISO);
           if (row && (includeCancelled || row.status !== "cancelled")) {
@@ -283,7 +283,7 @@ function BandColumn({
           }
           return <OpenCell key={slotISO} slotISO={slotISO} courseSlug={course} />;
         })}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -291,15 +291,14 @@ function BandColumn({
 function OpenCell({ slotISO, courseSlug }: { slotISO: string; courseSlug: string }) {
   const href = `/admin/tee-times/new?block=false&starts_at=${encodeURIComponent(slotISO)}&course_slug=${encodeURIComponent(courseSlug)}`;
   return (
-    <li>
-      <a
-        href={href}
-        className="flex items-center justify-between gap-2 bg-emerald-50 px-3 py-2 text-sm transition-colors hover:bg-emerald-100"
-      >
-        <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
-        <span className="text-[0.65rem] uppercase tracking-[0.2em] text-emerald-900">Open</span>
-      </a>
-    </li>
+    <a
+      href={href}
+      onClick={() => console.log("[tee-sheet] click open", { href })}
+      className="flex cursor-pointer items-center justify-between gap-2 bg-emerald-50 px-3 py-2 text-sm transition-colors hover:bg-emerald-100"
+    >
+      <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
+      <span className="text-[0.65rem] uppercase tracking-[0.2em] text-emerald-900">Open</span>
+    </a>
   );
 }
 
@@ -330,27 +329,26 @@ function BookedCell({
 
   const href = `/admin/tee-times/${row.id}?block=false`;
   return (
-    <li>
-      <a
-        href={href}
-        className={`flex items-center justify-between gap-2 px-3 py-2 text-sm transition-colors ${bg} ${dim}`}
-      >
-        <span className="flex items-baseline gap-2">
-          <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
-          {isBlocked ? (
-            <span className="italic text-stone-600">{row.block_reason || "Blocked"}</span>
-          ) : (
-            <>
-              <span className="text-foreground">{primary}</span>
-              <span className="text-xs text-muted-foreground">· {row.party_size}</span>
-            </>
-          )}
-        </span>
-        <span className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
-          {row.status}
-        </span>
-      </a>
-    </li>
+    <a
+      href={href}
+      onClick={() => console.log("[tee-sheet] click booked", { href, id: row.id })}
+      className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm transition-colors ${bg} ${dim}`}
+    >
+      <span className="flex items-baseline gap-2">
+        <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
+        {isBlocked ? (
+          <span className="italic text-stone-600">{row.block_reason || "Blocked"}</span>
+        ) : (
+          <>
+            <span className="text-foreground">{primary}</span>
+            <span className="text-xs text-muted-foreground">· {row.party_size}</span>
+          </>
+        )}
+      </span>
+      <span className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
+        {row.status}
+      </span>
+    </a>
   );
 }
 
