@@ -20,6 +20,36 @@ export const TEE_TIME_STATUSES: ReadonlyArray<TeeTimeStatus> = [
 
 export const TEE_TIME_COURSES = COURSE_OPTIONS;
 
+export const SLOT_INTERVAL_MIN = 10;
+export const DAY_START_HOUR = 7;
+export const DAY_END_HOUR = 19;
+
+/**
+ * Generate every tee-time slot for a single local date as ISO strings.
+ * Slots run from DAY_START_HOUR (inclusive) to DAY_END_HOUR (exclusive)
+ * in SLOT_INTERVAL_MIN steps, interpreted in the browser's local timezone.
+ */
+export function generateSlotsForDate(dateStr: string): string[] {
+  const [yStr, mStr, dStr] = dateStr.split("-");
+  const year = Number(yStr);
+  const month = Number(mStr) - 1;
+  const day = Number(dStr);
+  const out: string[] = [];
+  for (let h = DAY_START_HOUR; h < DAY_END_HOUR; h++) {
+    for (let min = 0; min < 60; min += SLOT_INTERVAL_MIN) {
+      out.push(new Date(year, month, day, h, min, 0, 0).toISOString());
+    }
+  }
+  return out;
+}
+
+/** Round an ISO timestamp to the nearest SLOT_INTERVAL_MIN boundary. */
+export function snapToSlot(iso: string): string {
+  const d = new Date(iso);
+  const ms = SLOT_INTERVAL_MIN * 60_000;
+  return new Date(Math.round(d.getTime() / ms) * ms).toISOString();
+}
+
 export type TeeTime = {
   id: string;
   starts_at: string;

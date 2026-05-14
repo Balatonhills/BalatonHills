@@ -5,6 +5,7 @@ import {
   createTeeTime,
   deleteTeeTime,
   getTeeTime,
+  snapToSlot,
   TEE_TIME_COURSES,
   TEE_TIME_STATUSES,
   updateTeeTime,
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/admin/tee-times/$id")({
   }),
   validateSearch: (search: Record<string, unknown>) => ({
     block: search.block === true || search.block === "true" || search.block === "1",
+    starts_at: typeof search.starts_at === "string" ? search.starts_at : undefined,
+    course_slug: typeof search.course_slug === "string" ? search.course_slug : undefined,
   }),
   component: TeeTimeEditPage,
 });
@@ -35,15 +38,19 @@ type FormState = {
   notes: string;
 };
 
-function defaultFormState(blockMode: boolean): FormState {
+function defaultFormState(opts: {
+  blockMode: boolean;
+  startsAtISO?: string;
+  courseSlug?: string;
+}): FormState {
   return {
-    starts_at: nextRoundHour(),
-    course_slug: "forest-hills",
+    starts_at: opts.startsAtISO ? isoToLocalInput(opts.startsAtISO) : nextRoundHour(),
+    course_slug: opts.courseSlug || "forest-hills",
     party_size: "1",
     primary_member_id: "",
     guest_name: "",
     guest_phone: "",
-    status: blockMode ? "blocked" : "booked",
+    status: opts.blockMode ? "blocked" : "booked",
     block_reason: "",
     notes: "",
   };
@@ -87,7 +94,7 @@ function formToInput(f: FormState): TeeTimeInput | null {
   if (!Number.isFinite(party) || party < 1) return null;
   const isBlocked = f.status === "blocked";
   return {
-    starts_at: date.toISOString(),
+    starts_at: snapToSlot(date.toISOString()),
     course_slug: f.course_slug,
     party_size: party,
     primary_member_id: isBlocked ? null : f.primary_member_id || null,
@@ -101,12 +108,14 @@ function formToInput(f: FormState): TeeTimeInput | null {
 
 function TeeTimeEditPage() {
   const { id } = Route.useParams();
-  const { block } = Route.useSearch();
+  const { block, starts_at, course_slug } = Route.useSearch();
   const navigate = useNavigate();
   const isNew = id === "new";
 
   const [members, setMembers] = useState<Member[]>([]);
-  const [form, setForm] = useState<FormState>(() => defaultFormState(block));
+  const [form, setForm] = useState<FormState>(() =>
+    defaultFormState({ blockMode: block, startsAtISO: starts_at, courseSlug: course_slug }),
+  );
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -120,7 +129,9 @@ function TeeTimeEditPage() {
 
   useEffect(() => {
     if (isNew) {
-      setForm(defaultFormState(block));
+      setForm(
+        defaultFormState({ blockMode: block, startsAtISO: starts_at, courseSlug: course_slug }),
+      );
       setLoading(false);
       setNotFound(false);
       return;
@@ -133,7 +144,7 @@ function TeeTimeEditPage() {
       })
       .catch((e) => setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Failed" }))
       .finally(() => setLoading(false));
-  }, [id, isNew, block]);
+  }, [id, isNew, block, starts_at, course_slug]);
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
@@ -150,7 +161,7 @@ function TeeTimeEditPage() {
         navigate({
           to: "/admin/tee-times/$id",
           params: { id: created.id },
-          search: { block: false },
+          search: { block: false, starts_at: undefined, course_slug: undefined },
           replace: true,
         });
       } else {
