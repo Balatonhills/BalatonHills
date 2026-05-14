@@ -15,6 +15,8 @@ export const Route = createFileRoute("/admin/tee-times")({
   component: TeeTimesPage,
 });
 
+const BAND_COUNT = 4;
+
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
@@ -28,7 +30,6 @@ function addDays(dateStr: string, n: number): string {
 function eachDayInRange(from: string, to: string): string[] {
   const days: string[] = [];
   let cur = from;
-  // safety cap at 31 days
   for (let i = 0; i < 31 && cur <= to; i++) {
     days.push(cur);
     cur = addDays(cur, 1);
@@ -38,6 +39,7 @@ function eachDayInRange(from: string, to: string): string[] {
 
 function TeeTimesPage() {
   const today = isoDate(new Date());
+  const [course, setCourse] = useState<string>(TEE_TIME_COURSES[0].slug);
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
   const [includeCancelled, setIncludeCancelled] = useState(false);
@@ -57,11 +59,11 @@ function TeeTimesPage() {
     setError(null);
     const fromISO = new Date(`${from}T00:00:00`).toISOString();
     const toISO = new Date(`${to}T23:59:59.999`).toISOString();
-    listTeeTimes({ from: fromISO, to: toISO, includeCancelled })
+    listTeeTimes({ from: fromISO, to: toISO, course_slug: course, includeCancelled })
       .then(setItems)
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
       .finally(() => setLoading(false));
-  }, [from, to, includeCancelled]);
+  }, [course, from, to, includeCancelled]);
 
   const memberById = useMemo(() => {
     const m = new Map<string, Member>();
@@ -69,10 +71,10 @@ function TeeTimesPage() {
     return m;
   }, [members]);
 
-  /** Key existing rows by `${ISO}__${course_slug}` for O(1) cell lookup. */
+  /** Single-course view: map keyed by exact ISO. */
   const occupied = useMemo(() => {
     const m = new Map<string, TeeTime>();
-    for (const t of items) m.set(`${t.starts_at}__${t.course_slug}`, t);
+    for (const t of items) m.set(t.starts_at, t);
     return m;
   }, [items]);
 
@@ -83,19 +85,35 @@ function TeeTimesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-input pb-6">
-        <div>
-          <h1 className="font-display text-3xl text-foreground">Tee sheet</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            10-minute slots, 07:00 – 19:00, both courses.{" "}
-            {loading
-              ? "Loading…"
-              : `${items.length} booking${items.length === 1 ? "" : "s"} in range.`}
-          </p>
-        </div>
+      <header className="border-b border-input pb-6">
+        <h1 className="font-display text-3xl text-foreground">Tee sheet</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          10-minute slots, 07:00 – 19:00. Click any slot to book or edit.
+        </p>
       </header>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-4">
+      <nav className="mt-6 flex border-b border-input">
+        {TEE_TIME_COURSES.map((c) => {
+          const active = c.slug === course;
+          return (
+            <button
+              key={c.slug}
+              type="button"
+              onClick={() => setCourse(c.slug)}
+              className={
+                "px-5 py-3 text-xs uppercase tracking-[0.2em] transition-colors " +
+                (active
+                  ? "border-b-2 border-gold text-foreground"
+                  : "border-b-2 border-transparent text-muted-foreground hover:text-foreground")
+              }
+            >
+              {c.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      <section className="mt-6 grid gap-4 sm:grid-cols-4">
         <label className="block">
           <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">From</span>
           <input
@@ -149,17 +167,22 @@ function TeeTimesPage() {
         </div>
       </section>
 
+      <Legend />
+
       {error && (
         <p className="mt-6 text-sm text-red-700" role="alert">
           {error}
         </p>
       )}
 
-      <section className="mt-8 space-y-10">
+      {loading && <p className="mt-6 text-sm text-muted-foreground">Loading…</p>}
+
+      <section className="mt-6 space-y-10">
         {days.map((day) => (
           <DaySheet
             key={day}
             day={day}
+            course={course}
             occupied={occupied}
             memberById={memberById}
             includeCancelled={includeCancelled}
@@ -170,99 +193,166 @@ function TeeTimesPage() {
   );
 }
 
+function Legend() {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+      <LegendSwatch className="bg-emerald-50 border-emerald-200" label="Open" />
+      <LegendSwatch className="bg-amber-50 border-amber-300" label="Booked / confirmed" />
+      <LegendSwatch className="bg-stone-100 border-stone-300" label="Blocked" />
+      <LegendSwatch className="bg-red-50 border-red-200" label="No-show" />
+    </div>
+  );
+}
+
+function LegendSwatch({ className, label }: { className: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={"inline-block h-3 w-5 border " + className} />
+      {label}
+    </span>
+  );
+}
+
 function DaySheet({
   day,
+  course,
   occupied,
   memberById,
   includeCancelled,
 }: {
   day: string;
+  course: string;
   occupied: Map<string, TeeTime>;
   memberById: Map<string, Member>;
   includeCancelled: boolean;
 }) {
   const slots = generateSlotsForDate(day);
+  const perBand = Math.ceil(slots.length / BAND_COUNT);
+  const bands: string[][] = [];
+  for (let i = 0; i < BAND_COUNT; i++) {
+    bands.push(slots.slice(i * perBand, (i + 1) * perBand));
+  }
+
   return (
     <div>
       <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
         {formatDayHeading(day)}
       </h2>
-      <div className="mt-3 overflow-x-auto border border-input">
-        <table className="w-full text-sm">
-          <thead className="bg-secondary/40">
-            <tr>
-              <Th className="w-24">Time</Th>
-              {TEE_TIME_COURSES.map((c) => (
-                <Th key={c.slug}>{c.label}</Th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {slots.map((slotISO) => (
-              <tr key={slotISO} className="border-t border-input">
-                <Td className="font-mono tabular-nums text-muted-foreground">
-                  {formatTime(slotISO)}
-                </Td>
-                {TEE_TIME_COURSES.map((c) => {
-                  const row = occupied.get(`${slotISO}__${c.slug}`);
-                  if (row && (includeCancelled || row.status !== "cancelled")) {
-                    return <BookedCell key={c.slug} row={row} memberById={memberById} />;
-                  }
-                  return <OpenCell key={c.slug} slotISO={slotISO} courseSlug={c.slug} />;
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {bands.map((bandSlots, i) => (
+          <BandColumn
+            key={i}
+            slots={bandSlots}
+            course={course}
+            occupied={occupied}
+            memberById={memberById}
+            includeCancelled={includeCancelled}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
+
+function BandColumn({
+  slots,
+  course,
+  occupied,
+  memberById,
+  includeCancelled,
+}: {
+  slots: string[];
+  course: string;
+  occupied: Map<string, TeeTime>;
+  memberById: Map<string, Member>;
+  includeCancelled: boolean;
+}) {
+  if (slots.length === 0) return null;
+  const first = formatTime(slots[0]);
+  const last = formatTime(slots[slots.length - 1]);
+  return (
+    <div>
+      <div className="mb-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+        {first} – {last}
+      </div>
+      <ul className="divide-y divide-input border border-input">
+        {slots.map((slotISO) => {
+          const row = occupied.get(slotISO);
+          if (row && (includeCancelled || row.status !== "cancelled")) {
+            return <BookedCell key={slotISO} row={row} memberById={memberById} slotISO={slotISO} />;
+          }
+          return <OpenCell key={slotISO} slotISO={slotISO} courseSlug={course} />;
+        })}
+      </ul>
     </div>
   );
 }
 
 function OpenCell({ slotISO, courseSlug }: { slotISO: string; courseSlug: string }) {
   return (
-    <td className="p-0">
+    <li>
       <Link
         to="/admin/tee-times/$id"
         params={{ id: "new" }}
         search={{ block: false, starts_at: slotISO, course_slug: courseSlug }}
-        className="flex h-full w-full items-center px-4 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:bg-secondary/40 hover:text-foreground"
+        className="flex items-center justify-between gap-2 bg-emerald-50 px-3 py-2 text-sm transition-colors hover:bg-emerald-100"
       >
-        Open
+        <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
+        <span className="text-[0.65rem] uppercase tracking-[0.2em] text-emerald-900">Open</span>
       </Link>
-    </td>
+    </li>
   );
 }
 
-function BookedCell({ row, memberById }: { row: TeeTime; memberById: Map<string, Member> }) {
-  const primary =
-    row.status === "blocked"
-      ? null
-      : row.primary_member_id
-        ? (memberById.get(row.primary_member_id)?.full_name ?? "—")
-        : (row.guest_name ?? "Guest");
-  const dim = row.status === "cancelled" ? "opacity-50" : "";
+function BookedCell({
+  row,
+  memberById,
+  slotISO,
+}: {
+  row: TeeTime;
+  memberById: Map<string, Member>;
+  slotISO: string;
+}) {
+  const isBlocked = row.status === "blocked";
+  const isCancelled = row.status === "cancelled";
+  const isNoShow = row.status === "no-show";
+  const primary = isBlocked
+    ? null
+    : row.primary_member_id
+      ? (memberById.get(row.primary_member_id)?.full_name ?? "—")
+      : (row.guest_name ?? "Guest");
+
+  const bg = isBlocked
+    ? "bg-stone-100 hover:bg-stone-200"
+    : isNoShow
+      ? "bg-red-50 hover:bg-red-100"
+      : "bg-amber-50 hover:bg-amber-100";
+  const dim = isCancelled ? "opacity-50 line-through" : "";
+
   return (
-    <td className={"p-0 " + dim}>
+    <li>
       <Link
         to="/admin/tee-times/$id"
         params={{ id: row.id }}
         search={{ block: false, starts_at: undefined, course_slug: undefined }}
-        className="flex h-full w-full flex-wrap items-center gap-2 px-4 py-3 text-foreground transition-colors hover:bg-secondary/40"
+        className={`flex items-center justify-between gap-2 px-3 py-2 text-sm transition-colors ${bg} ${dim}`}
       >
-        {row.status === "blocked" ? (
-          <span className="italic text-muted-foreground">{row.block_reason || "Blocked"}</span>
-        ) : (
-          <>
-            <span className="font-medium">{primary}</span>
-            <span className="text-xs text-muted-foreground">· party {row.party_size}</span>
-          </>
-        )}
-        <span className="ml-auto text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="flex items-baseline gap-2">
+          <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
+          {isBlocked ? (
+            <span className="italic text-stone-600">{row.block_reason || "Blocked"}</span>
+          ) : (
+            <>
+              <span className="text-foreground">{primary}</span>
+              <span className="text-xs text-muted-foreground">· {row.party_size}</span>
+            </>
+          )}
+        </span>
+        <span className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
           {row.status}
         </span>
       </Link>
-    </td>
+    </li>
   );
 }
 
@@ -281,21 +371,4 @@ function formatTime(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function Th({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <th
-      className={
-        "px-4 py-3 text-left text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground " +
-        (className ?? "")
-      }
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={"px-4 py-3 " + (className ?? "")}>{children}</td>;
 }
