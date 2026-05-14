@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { listMembers, type Member } from "@/lib/members";
 import {
@@ -289,17 +289,16 @@ function BandColumn({
 }
 
 function OpenCell({ slotISO, courseSlug }: { slotISO: string; courseSlug: string }) {
+  const href = `/admin/tee-times/new?block=false&starts_at=${encodeURIComponent(slotISO)}&course_slug=${encodeURIComponent(courseSlug)}`;
   return (
     <li>
-      <Link
-        to="/admin/tee-times/$id"
-        params={{ id: "new" }}
-        search={{ block: false, starts_at: slotISO, course_slug: courseSlug }}
+      <a
+        href={href}
         className="flex items-center justify-between gap-2 bg-emerald-50 px-3 py-2 text-sm transition-colors hover:bg-emerald-100"
       >
         <span className="font-mono tabular-nums text-foreground">{formatTime(slotISO)}</span>
         <span className="text-[0.65rem] uppercase tracking-[0.2em] text-emerald-900">Open</span>
-      </Link>
+      </a>
     </li>
   );
 }
@@ -329,12 +328,11 @@ function BookedCell({
       : "bg-amber-50 hover:bg-amber-100";
   const dim = isCancelled ? "opacity-50 line-through" : "";
 
+  const href = `/admin/tee-times/${row.id}?block=false`;
   return (
     <li>
-      <Link
-        to="/admin/tee-times/$id"
-        params={{ id: row.id }}
-        search={{ block: false, starts_at: undefined, course_slug: undefined }}
+      <a
+        href={href}
         className={`flex items-center justify-between gap-2 px-3 py-2 text-sm transition-colors ${bg} ${dim}`}
       >
         <span className="flex items-baseline gap-2">
@@ -351,7 +349,7 @@ function BookedCell({
         <span className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
           {row.status}
         </span>
-      </Link>
+      </a>
     </li>
   );
 }
