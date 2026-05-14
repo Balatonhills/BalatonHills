@@ -3,11 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { EDITABLE_ROUTES, invalidateMetadataCache, type RouteMetadata } from "@/lib/site-metadata";
 
-export const Route = createFileRoute("/admin/metadata")({
+export const Route = createFileRoute("/admin/website")({
   head: () => ({
-    meta: [{ title: "Site content — Admin" }, { name: "robots", content: "noindex, nofollow" }],
+    meta: [{ title: "Website — Admin" }, { name: "robots", content: "noindex, nofollow" }],
   }),
-  component: MetadataPage,
+  component: WebsitePage,
 });
 
 type FormState = {
@@ -40,7 +40,7 @@ function rowToForm(row: RouteMetadata | undefined): FormState {
   };
 }
 
-function MetadataPage() {
+function WebsitePage() {
   const [rows, setRows] = useState<Map<string, RouteMetadata>>(new Map());
   const [activePath, setActivePath] = useState<string>(EDITABLE_ROUTES[0].path);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -105,9 +105,9 @@ function MetadataPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <header className="border-b border-input pb-6">
-        <h1 className="font-display text-3xl text-foreground">Site content</h1>
+        <h1 className="font-display text-3xl text-foreground">Website</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Edit page metadata. Changes go live within 60 seconds.
+          Edit public-site metadata. Changes go live within 60 seconds.
         </p>
       </header>
 
