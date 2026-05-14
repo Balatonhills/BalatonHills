@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { countMembersByStatus, countRenewalsDueWithin } from "@/lib/members";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -14,44 +16,58 @@ type Module = {
   status?: "live" | "soon";
 };
 
-const MODULES: ReadonlyArray<Module> = [
-  {
-    to: "/admin/metadata",
-    title: "Site content",
-    description: "Page titles, descriptions, and Open Graph tags across the public site.",
-    status: "live",
-  },
-  {
-    to: "/admin/memberships",
-    title: "Memberships",
-    description: "Tier names, perks, and pricing shown on the public membership page.",
-    status: "live",
-  },
-  {
-    title: "Members",
-    description: "Directory of members — contact info, tier, renewal status.",
-    status: "soon",
-  },
-  {
-    title: "Tee times",
-    description: "Internal booking sheet alongside Golfigo: view, create, block.",
-    status: "soon",
-  },
-  {
-    title: "Pricing",
-    description: "Green fees, cart hire, range buckets, lessons.",
-    status: "soon",
-  },
-];
-
 function AdminIndex() {
+  const [memberCounts, setMemberCounts] = useState<{ active?: number; renewals?: number }>({});
+
+  useEffect(() => {
+    Promise.all([countMembersByStatus("active"), countRenewalsDueWithin(30)])
+      .then(([active, renewals]) => setMemberCounts({ active, renewals }))
+      .catch(() => {});
+  }, []);
+
+  const membersDescription =
+    memberCounts.active === undefined
+      ? "Directory of members — contact info, tier, renewal status."
+      : `${memberCounts.active} active · ${memberCounts.renewals} renewals due in 30 days`;
+
+  const modules: ReadonlyArray<Module> = [
+    {
+      to: "/admin/metadata",
+      title: "Site content",
+      description: "Page titles, descriptions, and Open Graph tags across the public site.",
+      status: "live",
+    },
+    {
+      to: "/admin/memberships",
+      title: "Memberships",
+      description: "Tier names, perks, and pricing shown on the public membership page.",
+      status: "live",
+    },
+    {
+      to: "/admin/members",
+      title: "Members",
+      description: membersDescription,
+      status: "live",
+    },
+    {
+      title: "Tee times",
+      description: "Internal booking sheet alongside Golfigo: view, create, block.",
+      status: "soon",
+    },
+    {
+      title: "Pricing",
+      description: "Green fees, cart hire, range buckets, lessons.",
+      status: "soon",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="font-display text-4xl text-foreground">Overview</h1>
       <p className="mt-2 text-sm text-muted-foreground">Pick a module to manage.</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((m) => (
+        {modules.map((m) => (
           <ModuleCard key={m.title} module={m} />
         ))}
       </div>

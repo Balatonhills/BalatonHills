@@ -19,7 +19,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminMetadataRouteImport } from './routes/admin.metadata'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminMembersIdRouteImport } from './routes/admin.members.$id'
 
 const MembershipRoute = MembershipRouteImport.update({
   id: '/membership',
@@ -71,10 +73,20 @@ const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
   path: '/memberships',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminMembersIdRoute = AdminMembersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminMembersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -86,9 +98,11 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/members/$id': typeof AdminMembersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,9 +112,11 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/members/$id': typeof AdminMembersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,9 +128,11 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/members/$id': typeof AdminMembersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,9 +145,11 @@ export interface FileRouteTypes {
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
     | '/admin/'
+    | '/admin/members/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,9 +159,11 @@ export interface FileRouteTypes {
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
     | '/admin'
+    | '/admin/members/$id'
   id:
     | '__root__'
     | '/'
@@ -152,9 +174,11 @@ export interface FileRouteTypes {
     | '/courses'
     | '/membership'
     | '/admin/login'
+    | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
     | '/admin/'
+    | '/admin/members/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -239,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembershipsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -246,11 +277,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/members/$id': {
+      id: '/admin/members/$id'
+      path: '/$id'
+      fullPath: '/admin/members/$id'
+      preLoaderRoute: typeof AdminMembersIdRouteImport
+      parentRoute: typeof AdminMembersRoute
+    }
   }
 }
 
+interface AdminMembersRouteChildren {
+  AdminMembersIdRoute: typeof AdminMembersIdRoute
+}
+
+const AdminMembersRouteChildren: AdminMembersRouteChildren = {
+  AdminMembersIdRoute: AdminMembersIdRoute,
+}
+
+const AdminMembersRouteWithChildren = AdminMembersRoute._addFileChildren(
+  AdminMembersRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMembersRoute: typeof AdminMembersRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminMetadataRoute: typeof AdminMetadataRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -258,6 +309,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
+  AdminMembersRoute: AdminMembersRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRoute,
   AdminMetadataRoute: AdminMetadataRoute,
   AdminIndexRoute: AdminIndexRoute,
