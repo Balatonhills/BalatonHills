@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { countMembersByStatus, countRenewalsDueWithin } from "@/lib/members";
+import { countTeeTimesBetween } from "@/lib/tee-times";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -16,19 +17,41 @@ type Module = {
   status?: "live" | "soon";
 };
 
+function todayBoundsISO() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  return { from: start.toISOString(), to: end.toISOString() };
+}
+
 function AdminIndex() {
-  const [memberCounts, setMemberCounts] = useState<{ active?: number; renewals?: number }>({});
+  const [counts, setCounts] = useState<{
+    active?: number;
+    renewals?: number;
+    teeTimesToday?: number;
+  }>({});
 
   useEffect(() => {
-    Promise.all([countMembersByStatus("active"), countRenewalsDueWithin(30)])
-      .then(([active, renewals]) => setMemberCounts({ active, renewals }))
+    const { from, to } = todayBoundsISO();
+    Promise.all([
+      countMembersByStatus("active"),
+      countRenewalsDueWithin(30),
+      countTeeTimesBetween(from, to),
+    ])
+      .then(([active, renewals, teeTimesToday]) => setCounts({ active, renewals, teeTimesToday }))
       .catch(() => {});
   }, []);
 
   const membersDescription =
-    memberCounts.active === undefined
+    counts.active === undefined
       ? "Directory of members — contact info, tier, renewal status."
-      : `${memberCounts.active} active · ${memberCounts.renewals} renewals due in 30 days`;
+      : `${counts.active} active · ${counts.renewals} renewals due in 30 days`;
+
+  const teeTimesDescription =
+    counts.teeTimesToday === undefined
+      ? "Internal booking sheet alongside Golfigo: view, create, block."
+      : `${counts.teeTimesToday} booking${counts.teeTimesToday === 1 ? "" : "s"} today`;
 
   const modules: ReadonlyArray<Module> = [
     {
@@ -50,14 +73,16 @@ function AdminIndex() {
       status: "live",
     },
     {
+      to: "/admin/tee-times",
       title: "Tee times",
-      description: "Internal booking sheet alongside Golfigo: view, create, block.",
-      status: "soon",
+      description: teeTimesDescription,
+      status: "live",
     },
     {
+      to: "/admin/pricing",
       title: "Pricing",
       description: "Green fees, cart hire, range buckets, lessons.",
-      status: "soon",
+      status: "live",
     },
   ];
 

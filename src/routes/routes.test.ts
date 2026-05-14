@@ -18,6 +18,9 @@ const routes = [
   () => import("./admin.memberships"),
   () => import("./admin.members"),
   () => import("./admin.members.$id"),
+  () => import("./admin.pricing"),
+  () => import("./admin.tee-times"),
+  () => import("./admin.tee-times.$id"),
 ];
 
 describe("route modules", () => {

@@ -17,10 +17,13 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminTeeTimesRouteImport } from './routes/admin.tee-times'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminMetadataRouteImport } from './routes/admin.metadata'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminTeeTimesIdRouteImport } from './routes/admin.tee-times.$id'
 import { Route as AdminMembersIdRouteImport } from './routes/admin.members.$id'
 
 const MembershipRoute = MembershipRouteImport.update({
@@ -63,6 +66,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTeeTimesRoute = AdminTeeTimesRouteImport.update({
+  id: '/tee-times',
+  path: '/tee-times',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMetadataRoute = AdminMetadataRouteImport.update({
   id: '/metadata',
   path: '/metadata',
@@ -83,6 +96,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTeeTimesIdRoute = AdminTeeTimesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminTeeTimesRoute,
+} as any)
 const AdminMembersIdRoute = AdminMembersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -101,8 +119,11 @@ export interface FileRoutesByFullPath {
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
+  '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,8 +136,11 @@ export interface FileRoutesByTo {
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
+  '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,8 +155,11 @@ export interface FileRoutesById {
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/metadata': typeof AdminMetadataRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
+  '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -148,8 +175,11 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
+    | '/admin/pricing'
+    | '/admin/tee-times'
     | '/admin/'
     | '/admin/members/$id'
+    | '/admin/tee-times/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,8 +192,11 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
+    | '/admin/pricing'
+    | '/admin/tee-times'
     | '/admin'
     | '/admin/members/$id'
+    | '/admin/tee-times/$id'
   id:
     | '__root__'
     | '/'
@@ -177,8 +210,11 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/memberships'
     | '/admin/metadata'
+    | '/admin/pricing'
+    | '/admin/tee-times'
     | '/admin/'
     | '/admin/members/$id'
+    | '/admin/tee-times/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -249,6 +285,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/tee-times': {
+      id: '/admin/tee-times'
+      path: '/tee-times'
+      fullPath: '/admin/tee-times'
+      preLoaderRoute: typeof AdminTeeTimesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/metadata': {
       id: '/admin/metadata'
       path: '/metadata'
@@ -277,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/tee-times/$id': {
+      id: '/admin/tee-times/$id'
+      path: '/$id'
+      fullPath: '/admin/tee-times/$id'
+      preLoaderRoute: typeof AdminTeeTimesIdRouteImport
+      parentRoute: typeof AdminTeeTimesRoute
+    }
     '/admin/members/$id': {
       id: '/admin/members/$id'
       path: '/$id'
@@ -299,11 +356,25 @@ const AdminMembersRouteWithChildren = AdminMembersRoute._addFileChildren(
   AdminMembersRouteChildren,
 )
 
+interface AdminTeeTimesRouteChildren {
+  AdminTeeTimesIdRoute: typeof AdminTeeTimesIdRoute
+}
+
+const AdminTeeTimesRouteChildren: AdminTeeTimesRouteChildren = {
+  AdminTeeTimesIdRoute: AdminTeeTimesIdRoute,
+}
+
+const AdminTeeTimesRouteWithChildren = AdminTeeTimesRoute._addFileChildren(
+  AdminTeeTimesRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMembersRoute: typeof AdminMembersRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminMetadataRoute: typeof AdminMetadataRoute
+  AdminPricingRoute: typeof AdminPricingRoute
+  AdminTeeTimesRoute: typeof AdminTeeTimesRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -312,6 +383,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMembersRoute: AdminMembersRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRoute,
   AdminMetadataRoute: AdminMetadataRoute,
+  AdminPricingRoute: AdminPricingRoute,
+  AdminTeeTimesRoute: AdminTeeTimesRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 
