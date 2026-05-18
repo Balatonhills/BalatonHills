@@ -116,6 +116,75 @@ export async function expensesByCategoryBetween(
   return out;
 }
 
+// ---- Receipts (Supabase Storage) ------------------------------------------
+
+const RECEIPTS_BUCKET = "receipts";
+const SIGNED_URL_TTL_SEC = 60 * 60; // 1h
+
+export const RECEIPT_ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "application/pdf",
+] as const;
+
+export const RECEIPT_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function extensionFor(file: File): string {
+  const name = file.name.toLowerCase();
+  const dot = name.lastIndexOf(".");
+  if (dot > -1 && dot < name.length - 1) return name.slice(dot + 1);
+  // Fallback by MIME
+  const mime = file.type;
+  if (mime === "image/jpeg") return "jpg";
+  if (mime === "image/png") return "png";
+  if (mime === "image/webp") return "webp";
+  if (mime === "image/heic") return "heic";
+  if (mime === "image/heif") return "heif";
+  if (mime === "application/pdf") return "pdf";
+  return "bin";
+}
+
+export async function uploadReceipt(file: File): Promise<string> {
+  if (file.size > RECEIPT_MAX_BYTES) {
+    throw new Error(
+      `File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max ${RECEIPT_MAX_BYTES / 1024 / 1024} MB.`,
+    );
+  }
+  const ext = extensionFor(file);
+  const path = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await getSupabase()
+    .storage.from(RECEIPTS_BUCKET)
+    .upload(path, file, { contentType: file.type || undefined, upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export async function deleteReceipt(path: string): Promise<void> {
+  if (!path) return;
+  const { error } = await getSupabase().storage.from(RECEIPTS_BUCKET).remove([path]);
+  if (error) throw error;
+}
+
+export async function getReceiptSignedUrl(path: string): Promise<string | null> {
+  if (!path) return null;
+  const { data, error } = await getSupabase()
+    .storage.from(RECEIPTS_BUCKET)
+    .createSignedUrl(path, SIGNED_URL_TTL_SEC);
+  if (error) return null;
+  return data?.signedUrl ?? null;
+}
+
+export function isImageReceipt(path: string | null): boolean {
+  if (!path) return false;
+  const ext = path.toLowerCase().split(".").pop() ?? "";
+  return ["jpg", "jpeg", "png", "webp", "heic", "heif"].includes(ext);
+}
+
+// ---- Date helpers ---------------------------------------------------------
+
 export function firstDayOfMonth(d: Date = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
 }

@@ -1,11 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createExpense,
   deleteExpense,
+  deleteReceipt,
   EXPENSE_CATEGORIES,
   getExpense,
+  getReceiptSignedUrl,
+  isImageReceipt,
+  RECEIPT_ACCEPTED_TYPES,
+  RECEIPT_MAX_BYTES,
   updateExpense,
+  uploadReceipt,
   type Expense,
   type ExpenseCategory,
   type ExpenseInput,
@@ -25,7 +31,6 @@ type FormState = {
   amount: string;
   currency: string;
   notes: string;
-  receipt_url: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -35,7 +40,6 @@ const EMPTY_FORM: FormState = {
   amount: "",
   currency: "HUF",
   notes: "",
-  receipt_url: "",
 };
 
 function expenseToForm(e: Expense): FormState {
@@ -46,11 +50,10 @@ function expenseToForm(e: Expense): FormState {
     amount: String(e.amount),
     currency: e.currency,
     notes: e.notes ?? "",
-    receipt_url: e.receipt_url ?? "",
   };
 }
 
-function formToInput(f: FormState): ExpenseInput | null {
+function formToInput(f: FormState, receiptPath: string | null): ExpenseInput | null {
   const amount = Number.parseFloat(f.amount);
   if (!Number.isFinite(amount) || amount < 0) return null;
   if (!f.date) return null;
@@ -61,7 +64,7 @@ function formToInput(f: FormState): ExpenseInput | null {
     amount,
     currency: f.currency.trim().toUpperCase() || "HUF",
     notes: f.notes.trim() || null,
-    receipt_url: f.receipt_url.trim() || null,
+    receipt_url: receiptPath,
   };
 }
 
@@ -71,6 +74,11 @@ function ExpenseEditPage() {
   const isNew = id === "new";
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [existingReceiptPath, setExistingReceiptPath] = useState<string | null>(null);
+  const [existingReceiptUrl, setExistingReceiptUrl] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [shouldRemove, setShouldRemove] = useState(false);
+
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -79,36 +87,86 @@ function ExpenseEditPage() {
   useEffect(() => {
     if (isNew) {
       setForm(EMPTY_FORM);
+      setExistingReceiptPath(null);
+      setExistingReceiptUrl(null);
+      setPendingFile(null);
+      setShouldRemove(false);
       setLoading(false);
       setNotFound(false);
       return;
     }
     setLoading(true);
+    setShouldRemove(false);
+    setPendingFile(null);
     getExpense(id)
-      .then((e) => {
-        if (!e) setNotFound(true);
-        else setForm(expenseToForm(e));
+      .then(async (e) => {
+        if (!e) {
+          setNotFound(true);
+          return;
+        }
+        setForm(expenseToForm(e));
+        setExistingReceiptPath(e.receipt_url);
+        if (e.receipt_url) {
+          const url = await getReceiptSignedUrl(e.receipt_url);
+          setExistingReceiptUrl(url);
+        } else {
+          setExistingReceiptUrl(null);
+        }
       })
-      .catch((e) => setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Failed" }))
+      .catch((err) =>
+        setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Failed" }),
+      )
       .finally(() => setLoading(false));
   }, [id, isNew]);
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setStatus(null);
-    const input = formToInput(form);
+
+    let nextReceiptPath: string | null = existingReceiptPath;
+    if (shouldRemove) nextReceiptPath = null;
+    if (pendingFile) {
+      try {
+        nextReceiptPath = await uploadReceipt(pendingFile);
+      } catch (err) {
+        setStatus({
+          kind: "err",
+          msg: err instanceof Error ? err.message : "Receipt upload failed",
+        });
+        return;
+      }
+    }
+
+    const input = formToInput(form, nextReceiptPath);
     if (!input) {
       setStatus({ kind: "err", msg: "Date and a non-negative amount are required." });
       return;
     }
+
     setSaving(true);
     try {
+      // Best-effort cleanup of the previous file if it was replaced/removed.
+      const removedOld =
+        existingReceiptPath && existingReceiptPath !== nextReceiptPath ? existingReceiptPath : null;
+
       if (isNew) {
         const created = await createExpense(input);
+        if (removedOld) await deleteReceipt(removedOld).catch(() => {});
         navigate({ to: "/admin/expenses/$id", params: { id: created.id }, replace: true });
       } else {
         await updateExpense(id, input);
+        if (removedOld) await deleteReceipt(removedOld).catch(() => {});
         setStatus({ kind: "ok", msg: "Saved" });
+        // Re-sync receipt state to match what we just wrote.
+        setExistingReceiptPath(nextReceiptPath);
+        setPendingFile(null);
+        setShouldRemove(false);
+        if (nextReceiptPath) {
+          const url = await getReceiptSignedUrl(nextReceiptPath);
+          setExistingReceiptUrl(url);
+        } else {
+          setExistingReceiptUrl(null);
+        }
       }
     } catch (err) {
       setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Save failed" });
@@ -123,7 +181,9 @@ function ExpenseEditPage() {
     setSaving(true);
     setStatus(null);
     try {
+      const oldReceipt = existingReceiptPath;
       await deleteExpense(id);
+      if (oldReceipt) await deleteReceipt(oldReceipt).catch(() => {});
       navigate({ to: "/admin/expenses" });
     } catch (err) {
       setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Delete failed" });
@@ -212,11 +272,21 @@ function ExpenseEditPage() {
             />
           </div>
 
-          <Field
-            label="Receipt URL"
-            type="url"
-            value={form.receipt_url}
-            onChange={(v) => setForm({ ...form, receipt_url: v })}
+          <ReceiptDropzone
+            existingPath={shouldRemove ? null : existingReceiptPath}
+            existingSignedUrl={shouldRemove ? null : existingReceiptUrl}
+            pendingFile={pendingFile}
+            onFileSelected={(f) => {
+              setPendingFile(f);
+              setShouldRemove(false);
+              setStatus(null);
+            }}
+            onRemove={() => {
+              setPendingFile(null);
+              setShouldRemove(true);
+              setStatus(null);
+            }}
+            onClearPending={() => setPendingFile(null)}
           />
 
           <Field
@@ -257,6 +327,218 @@ function ExpenseEditPage() {
         </form>
       )}
     </main>
+  );
+}
+
+function ReceiptDropzone({
+  existingPath,
+  existingSignedUrl,
+  pendingFile,
+  onFileSelected,
+  onRemove,
+  onClearPending,
+}: {
+  existingPath: string | null;
+  existingSignedUrl: string | null;
+  pendingFile: File | null;
+  onFileSelected: (file: File) => void;
+  onRemove: () => void;
+  onClearPending: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingFile) {
+      setPendingPreview(null);
+      return;
+    }
+    if (!pendingFile.type.startsWith("image/")) {
+      setPendingPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(pendingFile);
+    setPendingPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingFile]);
+
+  function acceptFile(file: File | null | undefined) {
+    setError(null);
+    if (!file) return;
+    if (file.size > RECEIPT_MAX_BYTES) {
+      setError(
+        `File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max ${RECEIPT_MAX_BYTES / 1024 / 1024} MB.`,
+      );
+      return;
+    }
+    if (
+      file.type &&
+      !RECEIPT_ACCEPTED_TYPES.includes(file.type as (typeof RECEIPT_ACCEPTED_TYPES)[number])
+    ) {
+      setError(`Unsupported file type: ${file.type}. Use JPEG, PNG, WebP, HEIC, or PDF.`);
+      return;
+    }
+    onFileSelected(file);
+  }
+
+  function onDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    acceptFile(file);
+  }
+
+  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    acceptFile(file);
+    // Clear so re-selecting the same file fires onChange again.
+    e.target.value = "";
+  }
+
+  const hasContent = pendingFile || (existingPath && existingSignedUrl);
+
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Receipt</div>
+
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        className={
+          "mt-2 flex cursor-pointer flex-col items-center justify-center gap-3 border border-dashed p-6 text-center transition-colors " +
+          (dragging
+            ? "border-gold bg-gold/5"
+            : "border-input hover:border-gold/60 hover:bg-secondary/30")
+        }
+      >
+        {pendingFile ? (
+          <PendingPreview file={pendingFile} previewUrl={pendingPreview} />
+        ) : existingPath && existingSignedUrl ? (
+          <ExistingPreview path={existingPath} signedUrl={existingSignedUrl} />
+        ) : (
+          <EmptyState />
+        )}
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept={RECEIPT_ACCEPTED_TYPES.join(",")}
+          onChange={onInputChange}
+          className="hidden"
+        />
+      </div>
+
+      {hasContent && (
+        <div className="mt-2 flex items-center gap-4 text-xs">
+          {pendingFile && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClearPending();
+              }}
+              className="uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+            >
+              Cancel selection
+            </button>
+          )}
+          {existingPath && !pendingFile && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="uppercase tracking-[0.2em] text-muted-foreground hover:text-red-700"
+            >
+              Remove receipt
+            </button>
+          )}
+          {existingPath && existingSignedUrl && !pendingFile && (
+            <a
+              href={existingSignedUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+            >
+              Open in new tab
+            </a>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p className="mt-2 text-xs text-red-700" role="alert">
+          {error}
+        </p>
+      )}
+
+      <p className="mt-2 text-xs text-muted-foreground">
+        Drop a photo or PDF here, or click to choose a file. Max 10 MB.
+      </p>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <>
+      <span aria-hidden className="text-3xl text-muted-foreground">
+        ⤓
+      </span>
+      <span className="text-sm text-foreground">Drop receipt here or click to upload</span>
+      <span className="text-xs text-muted-foreground">JPEG, PNG, WebP, HEIC, or PDF</span>
+    </>
+  );
+}
+
+function PendingPreview({ file, previewUrl }: { file: File; previewUrl: string | null }) {
+  return (
+    <>
+      {previewUrl ? (
+        <img
+          src={previewUrl}
+          alt="Receipt preview"
+          className="max-h-56 max-w-full object-contain"
+        />
+      ) : (
+        <span className="text-3xl">📄</span>
+      )}
+      <span className="text-xs text-foreground">{file.name}</span>
+      <span className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+        Pending upload · {(file.size / 1024).toFixed(0)} KB
+      </span>
+    </>
+  );
+}
+
+function ExistingPreview({ path, signedUrl }: { path: string; signedUrl: string }) {
+  const isImage = isImageReceipt(path);
+  return (
+    <>
+      {isImage ? (
+        <img src={signedUrl} alt="Receipt" className="max-h-56 max-w-full object-contain" />
+      ) : (
+        <span className="text-3xl">📄</span>
+      )}
+      <span className="text-xs text-muted-foreground">{path.split("/").pop()}</span>
+    </>
   );
 }
 
