@@ -23,8 +23,10 @@ import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminTeeTimesIdRouteImport } from './routes/admin.tee-times.$id'
 import { Route as AdminMembersIdRouteImport } from './routes/admin.members.$id'
+import { Route as AdminExpensesIdRouteImport } from './routes/admin.expenses.$id'
 
 const MembershipRoute = MembershipRouteImport.update({
   id: '/membership',
@@ -96,6 +98,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminExpensesRoute = AdminExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTeeTimesIdRoute = AdminTeeTimesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -106,6 +113,11 @@ const AdminMembersIdRoute = AdminMembersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminMembersRoute,
 } as any)
+const AdminExpensesIdRoute = AdminExpensesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminExpensesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -115,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
+  '/admin/expenses': typeof AdminExpensesRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
@@ -122,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin/website': typeof AdminWebsiteRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/expenses/$id': typeof AdminExpensesIdRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
   '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
@@ -132,6 +146,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
+  '/admin/expenses': typeof AdminExpensesRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
@@ -139,6 +154,7 @@ export interface FileRoutesByTo {
   '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin/website': typeof AdminWebsiteRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/expenses/$id': typeof AdminExpensesIdRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
   '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
@@ -151,6 +167,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRoute
   '/membership': typeof MembershipRoute
+  '/admin/expenses': typeof AdminExpensesRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
@@ -158,6 +175,7 @@ export interface FileRoutesById {
   '/admin/tee-times': typeof AdminTeeTimesRouteWithChildren
   '/admin/website': typeof AdminWebsiteRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/expenses/$id': typeof AdminExpensesIdRoute
   '/admin/members/$id': typeof AdminMembersIdRoute
   '/admin/tee-times/$id': typeof AdminTeeTimesIdRoute
 }
@@ -171,6 +189,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/courses'
     | '/membership'
+    | '/admin/expenses'
     | '/admin/login'
     | '/admin/members'
     | '/admin/memberships'
@@ -178,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/tee-times'
     | '/admin/website'
     | '/admin/'
+    | '/admin/expenses/$id'
     | '/admin/members/$id'
     | '/admin/tee-times/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -188,6 +208,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/courses'
     | '/membership'
+    | '/admin/expenses'
     | '/admin/login'
     | '/admin/members'
     | '/admin/memberships'
@@ -195,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/tee-times'
     | '/admin/website'
     | '/admin'
+    | '/admin/expenses/$id'
     | '/admin/members/$id'
     | '/admin/tee-times/$id'
   id:
@@ -206,6 +228,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/courses'
     | '/membership'
+    | '/admin/expenses'
     | '/admin/login'
     | '/admin/members'
     | '/admin/memberships'
@@ -213,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/tee-times'
     | '/admin/website'
     | '/admin/'
+    | '/admin/expenses/$id'
     | '/admin/members/$id'
     | '/admin/tee-times/$id'
   fileRoutesById: FileRoutesById
@@ -327,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/expenses': {
+      id: '/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AdminExpensesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/tee-times/$id': {
       id: '/admin/tee-times/$id'
       path: '/$id'
@@ -341,8 +372,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembersIdRouteImport
       parentRoute: typeof AdminMembersRoute
     }
+    '/admin/expenses/$id': {
+      id: '/admin/expenses/$id'
+      path: '/$id'
+      fullPath: '/admin/expenses/$id'
+      preLoaderRoute: typeof AdminExpensesIdRouteImport
+      parentRoute: typeof AdminExpensesRoute
+    }
   }
 }
+
+interface AdminExpensesRouteChildren {
+  AdminExpensesIdRoute: typeof AdminExpensesIdRoute
+}
+
+const AdminExpensesRouteChildren: AdminExpensesRouteChildren = {
+  AdminExpensesIdRoute: AdminExpensesIdRoute,
+}
+
+const AdminExpensesRouteWithChildren = AdminExpensesRoute._addFileChildren(
+  AdminExpensesRouteChildren,
+)
 
 interface AdminMembersRouteChildren {
   AdminMembersIdRoute: typeof AdminMembersIdRoute
@@ -369,6 +419,7 @@ const AdminTeeTimesRouteWithChildren = AdminTeeTimesRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminExpensesRoute: typeof AdminExpensesRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMembersRoute: typeof AdminMembersRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRoute
@@ -379,6 +430,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminExpensesRoute: AdminExpensesRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
   AdminMembersRoute: AdminMembersRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRoute,

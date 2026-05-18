@@ -16,6 +16,7 @@ const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; exact?: boolean }> =
   { to: "/admin/members", label: "Members" },
   { to: "/admin/tee-times", label: "Tee times" },
   { to: "/admin/pricing", label: "Pricing" },
+  { to: "/admin/expenses", label: "Expenses" },
 ];
 
 function AdminLayout() {

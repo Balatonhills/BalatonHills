@@ -12,6 +12,7 @@ import {
   TEE_TIME_COURSES,
   type TeeTime,
 } from "@/lib/tee-times";
+import { firstDayOfMonth, lastDayOfMonth, sumExpensesBetween } from "@/lib/expenses";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -48,6 +49,11 @@ const MODULES: ReadonlyArray<Module> = [
     title: "Pricing",
     description: "Green fees, cart hire, range buckets, lessons.",
   },
+  {
+    to: "/admin/expenses",
+    title: "Expenses",
+    description: "Operating expenses ledger — payroll, grounds, facilities, supplies.",
+  },
 ];
 
 const TODAY_PREVIEW_LIMIT = 6;
@@ -72,6 +78,7 @@ function AdminIndex() {
   const [renewals, setRenewals] = useState<number | null>(null);
   const [bookingsToday, setBookingsToday] = useState<number | null>(null);
   const [bookingsWeek, setBookingsWeek] = useState<number | null>(null);
+  const [expensesMonth, setExpensesMonth] = useState<number | null>(null);
   const [todayList, setTodayList] = useState<TeeTime[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,14 +91,16 @@ function AdminIndex() {
       countRenewalsDueWithin(30),
       countTeeTimesBetween(today.from, today.to),
       countTeeTimesBetween(week.from, week.to),
+      sumExpensesBetween(firstDayOfMonth(), lastDayOfMonth()),
       listTeeTimes({ from: today.from, to: today.to, includeCancelled: false }),
       listMembers(),
     ])
-      .then(([a, r, bt, bw, list, mems]) => {
+      .then(([a, r, bt, bw, exp, list, mems]) => {
         setActiveMembers(a);
         setRenewals(r);
         setBookingsToday(bt);
         setBookingsWeek(bw);
+        setExpensesMonth(exp);
         setTodayList(list);
         setMembers(mems);
       })
@@ -115,7 +124,7 @@ function AdminIndex() {
         Today at a glance. Pick a module below to drill in.
       </p>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatTile
           label="Active members"
           value={activeMembers}
@@ -140,6 +149,13 @@ function AdminIndex() {
           value={bookingsWeek}
           loading={loading}
           to="/admin/tee-times"
+        />
+        <StatTile
+          label="Expenses this month"
+          value={expensesMonth}
+          format="money"
+          loading={loading}
+          to="/admin/expenses"
         />
       </section>
 
@@ -207,13 +223,20 @@ function StatTile({
   loading,
   to,
   warn,
+  format,
 }: {
   label: string;
   value: number | null;
   loading: boolean;
   to: string;
   warn?: boolean;
+  format?: "money";
 }) {
+  const display = loading
+    ? "—"
+    : format === "money"
+      ? `${(value ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} HUF`
+      : (value ?? 0);
   return (
     <Link
       to={to}
@@ -222,10 +245,13 @@ function StatTile({
       <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">{label}</div>
       <div
         className={
-          "mt-3 font-display text-4xl tabular-nums " + (warn ? "text-amber-700" : "text-foreground")
+          "mt-3 font-display tabular-nums " +
+          (format === "money" ? "text-2xl" : "text-4xl") +
+          " " +
+          (warn ? "text-amber-700" : "text-foreground")
         }
       >
-        {loading ? "—" : (value ?? 0)}
+        {display}
       </div>
     </Link>
   );
