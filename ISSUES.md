@@ -42,13 +42,14 @@ Every domain table has `USING (true) WITH CHECK (true)` for `authenticated`. Sin
 
 ## 🟡 Maintenance debt
 
-### 5. `updated_by` columns are never populated
+### 5. `updated_by` columns are never populated — ✅ FIXED 2026-05-20
 
-Every table has the column, no code ever writes it. Audit trail is broken.
+Single consolidated trigger function handles both audit columns.
 
-- [ ] Postgres `before update` trigger on all six tables: `new.updated_by = auth.uid()`
-- [ ] Same trigger for `before insert` (set `created_by` if/when we add it, or `updated_by`)
-- [ ] Verify: edit a row in admin → `select updated_by from <table>` shows the signed-in user's uuid
+- [x] `public.set_audit_columns()` (BEFORE INSERT OR UPDATE) sets `updated_at = now()` on UPDATE and `updated_by = auth.uid()` on both. `search_path = ''` set explicitly.
+- [x] Wired on all six tables (`site_metadata`, `pricing_items`, `membership_tiers`, `members`, `tee_times`, `expenses`); old per-table `*_touch` triggers dropped.
+- [x] Service-role inserts leave `updated_by` NULL (no JWT) — confirmed via SQL smoke.
+- [x] Verify in prod: edit a row from the admin UI → `select updated_by from <table> order by updated_at desc limit 1` shows your auth user's UUID.
 
 ### 6. No CI workflow
 
@@ -57,12 +58,9 @@ Tests / lint / typecheck only run locally. Vercel's build runs `tsc` but not vit
 - [ ] Add `.github/workflows/ci.yml` that runs `npm ci && npm run lint && npx tsc --noEmit && npm test` on PR + push to main
 - [ ] Optional: add `actions/cache` for `node_modules`
 
-### 7. Postgres functions missing `search_path`
+### 7. Postgres functions missing `search_path` — ✅ FIXED 2026-05-20 (as side effect of #5)
 
-Supabase advisor flags `touch_updated_at` and `touch_site_metadata_updated_at` (warning `function_search_path_mutable`).
-
-- [ ] One migration adding `set search_path = ''` to both function bodies
-- [ ] Reference: [Supabase docs](https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable)
+Both flagged helpers (`touch_updated_at`, `touch_site_metadata_updated_at`) were dropped when the new `set_audit_columns()` trigger replaced them. The replacement explicitly sets `search_path = ''`. Supabase advisor confirms no `function_search_path_mutable` warnings remain.
 
 ### 8. No preview deployments on Vercel
 
