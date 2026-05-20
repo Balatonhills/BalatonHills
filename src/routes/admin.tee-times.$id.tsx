@@ -4,6 +4,7 @@ import { listMembers, type Member } from "@/lib/members";
 import {
   createTeeTime,
   deleteTeeTime,
+  findConflictingTeeTime,
   getTeeTime,
   snapToSlot,
   TEE_TIME_COURSES,
@@ -156,6 +157,21 @@ function TeeTimeEditPage() {
     }
     setSaving(true);
     try {
+      // Pre-flight conflict check (DB has a partial unique index as the
+      // ultimate guard; this gives a friendlier message before that fires).
+      if (input.status !== "cancelled") {
+        const conflict = await findConflictingTeeTime(
+          input.starts_at,
+          input.course_slug,
+          isNew ? undefined : id,
+        );
+        if (conflict) {
+          setStatus({ kind: "err", msg: conflictMessage(conflict) });
+          setSaving(false);
+          return;
+        }
+      }
+
       if (isNew) {
         const created = await createTeeTime(input);
         navigate({
@@ -169,10 +185,27 @@ function TeeTimeEditPage() {
         setStatus({ kind: "ok", msg: "Saved" });
       }
     } catch (err) {
-      setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Save failed" });
+      const msg = err instanceof Error ? err.message : "Save failed";
+      // Postgres unique violation surfaces if a race slips past the pre-flight.
+      const friendly = /tee_times_unique_active_slot|duplicate key|already exists/i.test(msg)
+        ? "Another booking or block already uses this slot."
+        : msg;
+      setStatus({ kind: "err", msg: friendly });
     } finally {
       setSaving(false);
     }
+  }
+
+  function conflictMessage(c: TeeTime): string {
+    const when = new Date(c.starts_at).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    if (c.status === "blocked") {
+      return `Slot is blocked (${c.block_reason || "no reason given"}) at ${when}. Cancel the block first or pick another slot.`;
+    }
+    const who = c.guest_name || (c.primary_member_id ? "a member" : "an unnamed party");
+    return `${when} on this course is already taken (${who}, ${c.status}). Pick a different slot.`;
   }
 
   async function onDelete() {

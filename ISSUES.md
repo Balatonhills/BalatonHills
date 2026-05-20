@@ -6,13 +6,14 @@ Tracking findings from the 2026-05-19 architecture audit. Roughly priority-order
 
 ## 🔴 Real risks
 
-### 1. Double-booking is possible on `tee_times`
+### 1. Double-booking is possible on `tee_times` — ✅ FIXED 2026-05-20
 
-No DB constraint on `(starts_at, course_slug)` for live rows. No UI conflict check either. Two admins (or one admin twice) can book the same slot.
+Partial unique index added; pre-flight check in the form for a friendly error.
 
-- [ ] Add partial unique index: `unique(starts_at, course_slug) where status not in ('cancelled', 'blocked')`
-- [ ] In [src/routes/admin.tee-times.$id.tsx](src/routes/admin.tee-times.$id.tsx), on save: check for an existing live row at the same slot+course and surface a conflict error before insert
-- [ ] Smoke: try to create two bookings at the same slot → second one fails clearly
+- [x] Added partial unique index `tee_times_unique_active_slot on (starts_at, course_slug) where status <> 'cancelled'` (blocks also occupy a slot, so they're included)
+- [x] `findConflictingTeeTime` helper in [src/lib/tee-times.ts](src/lib/tee-times.ts); pre-flight call in [src/routes/admin.tee-times.$id.tsx](src/routes/admin.tee-times.$id.tsx) with a per-status conflict message
+- [x] Postgres unique-violation also caught and rephrased in the catch block as a belt-and-braces guard against a race
+- [x] DB smoke confirmed: booking+booking blocked, block+booking blocked, cancelled rows allowed
 
 ### 2. RLS policies are wide-open for any authenticated user
 

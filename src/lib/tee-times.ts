@@ -128,6 +128,27 @@ export async function deleteTeeTime(id: string): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Returns an existing non-cancelled tee_time at the given slot+course, if any.
+ * Used to surface friendly conflict errors before the DB unique index fires.
+ */
+export async function findConflictingTeeTime(
+  startsAt: string,
+  courseSlug: string,
+  excludeId?: string,
+): Promise<TeeTime | null> {
+  let q = getSupabase()
+    .from("tee_times")
+    .select("*")
+    .eq("starts_at", startsAt)
+    .eq("course_slug", courseSlug)
+    .neq("status", "cancelled");
+  if (excludeId) q = q.neq("id", excludeId);
+  const { data, error } = await q.limit(1);
+  if (error) throw error;
+  return (data?.[0] as TeeTime | undefined) ?? null;
+}
+
 export async function countTeeTimesBetween(fromISO: string, toISO: string): Promise<number> {
   const { count, error } = await getSupabase()
     .from("tee_times")
