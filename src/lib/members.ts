@@ -41,7 +41,11 @@ export type ListMembersFilter = {
 };
 
 export async function listMembers(filter: ListMembersFilter = {}): Promise<Member[]> {
-  let q = getSupabase().from("members").select("*").order("full_name", { ascending: true });
+  let q = getSupabase()
+    .from("members")
+    .select("*")
+    .is("deleted_at", null)
+    .order("full_name", { ascending: true });
   if (filter.q && filter.q.trim()) q = q.ilike("full_name", `%${filter.q.trim()}%`);
   if (filter.status) q = q.eq("status", filter.status);
   if (filter.tier_id) q = q.eq("tier_id", filter.tier_id);
@@ -51,7 +55,12 @@ export async function listMembers(filter: ListMembersFilter = {}): Promise<Membe
 }
 
 export async function getMember(id: string): Promise<Member | null> {
-  const { data, error } = await getSupabase().from("members").select("*").eq("id", id).single();
+  const { data, error } = await getSupabase()
+    .from("members")
+    .select("*")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .single();
   if (error) {
     if (error.code === "PGRST116") return null;
     throw error;
@@ -76,8 +85,12 @@ export async function updateMember(id: string, input: MemberInput): Promise<Memb
   return data as Member;
 }
 
+/** Soft-delete: marks deleted_at; the audit trigger fills deleted_by. */
 export async function deleteMember(id: string): Promise<void> {
-  const { error } = await getSupabase().from("members").delete().eq("id", id);
+  const { error } = await getSupabase()
+    .from("members")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -85,6 +98,7 @@ export async function countMembersByStatus(status: MemberStatus): Promise<number
   const { count, error } = await getSupabase()
     .from("members")
     .select("id", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("status", status);
   if (error) return 0;
   return count ?? 0;
@@ -97,6 +111,7 @@ export async function countRenewalsDueWithin(days: number): Promise<number> {
   const { count, error } = await getSupabase()
     .from("members")
     .select("id", { count: "exact", head: true })
+    .is("deleted_at", null)
     .gte("renewal_due", fmt(today))
     .lte("renewal_due", fmt(future))
     .eq("status", "active");

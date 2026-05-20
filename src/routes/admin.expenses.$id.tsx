@@ -177,13 +177,13 @@ function ExpenseEditPage() {
 
   async function onDelete() {
     if (isNew) return;
-    if (!window.confirm("Delete this expense? This cannot be undone.")) return;
+    if (!window.confirm("Delete this expense?")) return;
     setSaving(true);
     setStatus(null);
     try {
-      const oldReceipt = existingReceiptPath;
+      // Soft-delete: row is marked deleted, receipt blob is kept so an
+      // undelete restores the expense exactly as it was.
       await deleteExpense(id);
-      if (oldReceipt) await deleteReceipt(oldReceipt).catch(() => {});
       navigate({ to: "/admin/expenses" });
     } catch (err) {
       setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Delete failed" });

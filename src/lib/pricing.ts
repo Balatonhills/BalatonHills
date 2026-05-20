@@ -43,6 +43,7 @@ export async function listPricing(): Promise<PricingItem[]> {
   const { data, error } = await getSupabase()
     .from("pricing_items")
     .select("*")
+    .is("deleted_at", null)
     .order("sort_order", { ascending: true })
     .order("category", { ascending: true })
     .order("label", { ascending: true });
@@ -71,7 +72,11 @@ export async function updatePricing(id: string, input: PricingItemInput): Promis
   return data as PricingItem;
 }
 
+/** Soft-delete: marks deleted_at; the audit trigger fills deleted_by. */
 export async function deletePricing(id: string): Promise<void> {
-  const { error } = await getSupabase().from("pricing_items").delete().eq("id", id);
+  const { error } = await getSupabase()
+    .from("pricing_items")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }

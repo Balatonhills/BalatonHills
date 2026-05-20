@@ -49,7 +49,8 @@ Single consolidated trigger function handles both audit columns.
 - [x] `public.set_audit_columns()` (BEFORE INSERT OR UPDATE) sets `updated_at = now()` on UPDATE and `updated_by = auth.uid()` on both. `search_path = ''` set explicitly.
 - [x] Wired on all six tables (`site_metadata`, `pricing_items`, `membership_tiers`, `members`, `tee_times`, `expenses`); old per-table `*_touch` triggers dropped.
 - [x] Service-role inserts leave `updated_by` NULL (no JWT) — confirmed via SQL smoke.
-- [x] Verify in prod: edit a row from the admin UI → `select updated_by from <table> order by updated_at desc limit 1` shows your auth user's UUID.
+- [x] **2026-05-20 follow-up:** delete audit was previously broken (DELETE blows away the row, no `deleted_by` trail). Now: the five user-deletable tables (`pricing_items`, `membership_tiers`, `members`, `tee_times`, `expenses`) carry `deleted_at` + `deleted_by` columns. The Delete button performs a soft-delete UPDATE; the audit trigger fills `deleted_by` when `deleted_at` flips from NULL → non-NULL (and clears it on undelete). List/get/count/sum helpers across the libs filter `deleted_at IS NULL`. The tee-times unique-slot index was tightened to ignore soft-deleted rows so undeleting into an occupied slot is rejected. Receipt blobs in storage are preserved on soft-delete so an undelete restores the expense intact.
+- [x] Verify in prod: edit a row from the admin UI → `select updated_by from <table> order by updated_at desc limit 1` shows your auth user's UUID. Delete a row → `select deleted_at, deleted_by from <table> where id = '<id>'` shows the timestamp + your UUID.
 
 ### 6. No CI workflow
 

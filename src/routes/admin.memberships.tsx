@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
-import { invalidateTiersCache, listAllTiers, type MembershipTier } from "@/lib/membership-tiers";
+import {
+  deleteTier,
+  invalidateTiersCache,
+  listAllTiers,
+  type MembershipTier,
+} from "@/lib/membership-tiers";
 
 export const Route = createFileRoute("/admin/memberships")({
   head: () => ({
@@ -124,15 +129,17 @@ function MembershipsPage() {
     if (isNew) return;
     const current = tiers.find((t) => t.id === activeId);
     if (!current) return;
-    if (!window.confirm(`Delete tier "${current.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete tier "${current.name}"?`)) return;
     setSaving(true);
     setStatus(null);
-    const { error } = await getSupabase().from("membership_tiers").delete().eq("id", activeId);
-    setSaving(false);
-    if (error) {
-      setStatus({ kind: "err", msg: error.message });
+    try {
+      await deleteTier(activeId);
+    } catch (err) {
+      setSaving(false);
+      setStatus({ kind: "err", msg: err instanceof Error ? err.message : "Delete failed" });
       return;
     }
+    setSaving(false);
     invalidateTiersCache();
     setActiveId(NEW_TIER_ID);
     refresh();

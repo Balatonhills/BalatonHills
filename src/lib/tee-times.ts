@@ -86,7 +86,11 @@ export type ListTeeTimesFilter = {
 };
 
 export async function listTeeTimes(filter: ListTeeTimesFilter = {}): Promise<TeeTime[]> {
-  let q = getSupabase().from("tee_times").select("*").order("starts_at", { ascending: true });
+  let q = getSupabase()
+    .from("tee_times")
+    .select("*")
+    .is("deleted_at", null)
+    .order("starts_at", { ascending: true });
   if (filter.from) q = q.gte("starts_at", filter.from);
   if (filter.to) q = q.lte("starts_at", filter.to);
   if (filter.course_slug) q = q.eq("course_slug", filter.course_slug);
@@ -98,7 +102,12 @@ export async function listTeeTimes(filter: ListTeeTimesFilter = {}): Promise<Tee
 }
 
 export async function getTeeTime(id: string): Promise<TeeTime | null> {
-  const { data, error } = await getSupabase().from("tee_times").select("*").eq("id", id).single();
+  const { data, error } = await getSupabase()
+    .from("tee_times")
+    .select("*")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .single();
   if (error) {
     if (error.code === "PGRST116") return null;
     throw error;
@@ -123,14 +132,19 @@ export async function updateTeeTime(id: string, input: TeeTimeInput): Promise<Te
   return data as TeeTime;
 }
 
+/** Soft-delete: marks deleted_at; the audit trigger fills deleted_by. */
 export async function deleteTeeTime(id: string): Promise<void> {
-  const { error } = await getSupabase().from("tee_times").delete().eq("id", id);
+  const { error } = await getSupabase()
+    .from("tee_times")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }
 
 /**
- * Returns an existing non-cancelled tee_time at the given slot+course, if any.
- * Used to surface friendly conflict errors before the DB unique index fires.
+ * Returns an existing live (non-cancelled, non-deleted) tee_time at the given
+ * slot+course, if any. Used to surface friendly conflict errors before the DB
+ * unique index fires.
  */
 export async function findConflictingTeeTime(
   startsAt: string,
@@ -142,6 +156,7 @@ export async function findConflictingTeeTime(
     .select("*")
     .eq("starts_at", startsAt)
     .eq("course_slug", courseSlug)
+    .is("deleted_at", null)
     .neq("status", "cancelled");
   if (excludeId) q = q.neq("id", excludeId);
   const { data, error } = await q.limit(1);
@@ -153,6 +168,7 @@ export async function countTeeTimesBetween(fromISO: string, toISO: string): Prom
   const { count, error } = await getSupabase()
     .from("tee_times")
     .select("id", { count: "exact", head: true })
+    .is("deleted_at", null)
     .gte("starts_at", fromISO)
     .lte("starts_at", toISO)
     .neq("status", "cancelled");

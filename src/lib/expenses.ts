@@ -49,7 +49,11 @@ export type ListExpensesFilter = {
 };
 
 export async function listExpenses(filter: ListExpensesFilter = {}): Promise<Expense[]> {
-  let q = getSupabase().from("expenses").select("*").order("date", { ascending: false });
+  let q = getSupabase()
+    .from("expenses")
+    .select("*")
+    .is("deleted_at", null)
+    .order("date", { ascending: false });
   if (filter.from) q = q.gte("date", filter.from);
   if (filter.to) q = q.lte("date", filter.to);
   if (filter.category) q = q.eq("category", filter.category);
@@ -59,7 +63,12 @@ export async function listExpenses(filter: ListExpensesFilter = {}): Promise<Exp
 }
 
 export async function getExpense(id: string): Promise<Expense | null> {
-  const { data, error } = await getSupabase().from("expenses").select("*").eq("id", id).single();
+  const { data, error } = await getSupabase()
+    .from("expenses")
+    .select("*")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .single();
   if (error) {
     if (error.code === "PGRST116") return null;
     throw error;
@@ -84,8 +93,13 @@ export async function updateExpense(id: string, input: ExpenseInput): Promise<Ex
   return { ...data, amount: Number(data.amount) } as Expense;
 }
 
+/** Soft-delete: marks deleted_at; the audit trigger fills deleted_by.
+ *  Receipt blob in storage is preserved so an undelete restores the row intact. */
 export async function deleteExpense(id: string): Promise<void> {
-  const { error } = await getSupabase().from("expenses").delete().eq("id", id);
+  const { error } = await getSupabase()
+    .from("expenses")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -93,6 +107,7 @@ export async function sumExpensesBetween(fromDate: string, toDate: string): Prom
   const { data, error } = await getSupabase()
     .from("expenses")
     .select("amount")
+    .is("deleted_at", null)
     .gte("date", fromDate)
     .lte("date", toDate);
   if (error) return 0;
@@ -106,6 +121,7 @@ export async function expensesByCategoryBetween(
   const { data, error } = await getSupabase()
     .from("expenses")
     .select("category, amount")
+    .is("deleted_at", null)
     .gte("date", fromDate)
     .lte("date", toDate);
   if (error) return {};
