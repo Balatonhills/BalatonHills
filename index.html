@@ -112,13 +112,55 @@
         </div>
     </section>
 
+Here is how to seamlessly integrate your live Koalendar widget directly into that premium booking section.
+
+Instead of hiding the widget inside a plain container, this code displays the active booking calendar in a framed, high-end presentation block that matches the emerald and stone color scheme of the rest of the website.
+
+Replace the previous <!-- Book a Tee Time --> section with this code:
+
+HTML
     <!-- Book a Tee Time -->
-    <section id="booking" class="py-24 max-w-4xl mx-auto px-6 text-center">
-        <h2 class="text-4xl mb-6">Book a Tee Time</h2>
-        <p class="mb-10 text-stone-600">Experience the tranquility of the hills. Select your preferred date and time below.</p>
-        <div class="bg-white border border-stone-200 p-10 rounded shadow-sm">
-            <p class="text-stone-400 italic">[Integration for booking system or simple reservation form goes here]</p>
-            <button class="mt-6 bg-emerald-900 text-white px-10 py-3 uppercase tracking-widest text-xs">Check Availability</button>
+    <section id="booking" class="py-24 bg-stone-100/50 border-y border-stone-200">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-4xl mb-4">Book a Tee Time</h2>
+                <p class="text-stone-600">Experience the premium tranquility of the Balaton hills. Select your preferred date and tee time instantly below using our live reservation calendar.</p>
+            </div>
+            
+            <div class="bg-white border border-stone-200 rounded-xl shadow-xl overflow-hidden grid lg:grid-cols-4">
+                <!-- Left Sidebar Club Info Panel -->
+                <div class="bg-emerald-950 p-8 text-white flex flex-col justify-between lg:col-span-1">
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Reservations</span>
+                        <h3 class="text-2xl mt-2 mb-6 font-serif">Club Guidelines</h3>
+                        <ul class="space-y-4 text-sm text-stone-300">
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Standard intervals are 10 minutes apart.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Cancellations allowed up to 24 hours prior.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Dress code: Proper golf attire required.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-emerald-800 text-xs text-stone-400">
+                        Need group custom event hosting or equipment rentals? <br>
+                        <a href="#contact" class="text-emerald-400 underline hover:text-emerald-300 transition">Contact administration</a>
+                    </div>
+                </div>
+
+                <!-- Live Koalendar Embed Area -->
+                <div class="lg:col-span-3 p-4 bg-stone-50 min-h-[650px] flex flex-col justify-center">
+                    <!-- Koalendar Inline Embed Start -->
+                    <div id="inline-widget-tee-times-vadrozsa" class="w-full h-full"></div>
+                    <script>window.Koalendar=window.Koalendar||function(){(Koalendar.props=Koalendar.props||[]).push(arguments)};</script>
+                    <script async src="https://koalendar.com/assets/widget.js"></script>
+                    <script>Koalendar('inline', {"url":"https://koalendar.com/e/tee-times-vadrozsa","selector":"#inline-widget-tee-times-vadrozsa"});</script>
+                    <!-- Koalendar Inline Embed End -->
+                </div>
+            </div>
         </div>
     </section>
 
