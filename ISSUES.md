@@ -15,13 +15,18 @@ Partial unique index added; pre-flight check in the form for a friendly error.
 - [x] Postgres unique-violation also caught and rephrased in the catch block as a belt-and-braces guard against a race
 - [x] DB smoke confirmed: booking+booking blocked, block+booking blocked, cancelled rows allowed
 
-### 2. RLS policies are wide-open for any authenticated user
+### 2. RLS policies are wide-open for any authenticated user — ✅ FIXED 2026-05-26
 
-Every domain table has `USING (true) WITH CHECK (true)` for `authenticated`. Single-owner is fine; a second user gets full delete on every table.
+Two roles introduced (`staff` + `admin`), stored in `auth.users.app_metadata.role`. Every domain table now has role-scoped RLS via a new `public.is_admin()` helper that reads the JWT claim.
 
-- [ ] Decide on roles before adding any second user (e.g. `owner`, `staff`, `accountant`)
-- [ ] Add a `user_roles` table (or `app_metadata.role` on `auth.users`) and tighten policies per role
-- [ ] Reference: Supabase advisor `rls_policy_always_true` flags for `expenses`, `members`, `membership_tiers`, `pricing_items`, `tee_times`, `site_metadata`
+- [x] Role plumbing in [src/lib/admin-auth.ts](src/lib/admin-auth.ts) (`useIsAdmin()`, `roleFromSession` defaults missing → `staff`)
+- [x] Admin-only writes on `site_metadata`, `pricing_items`, `membership_tiers`
+- [x] `members`: authenticated R+C+U; staff can't set `deleted_at`; hard DELETE admin-only
+- [x] `tee_times`: full CRUD for any authenticated (both roles share this)
+- [x] `expenses`: admin sees all, staff sees only own (`created_by = auth.uid()`); INSERT stamps `created_by` via the audit trigger
+- [x] Backfilled four existing users (2 admin / 2 staff)
+- [x] UI: top nav, dashboard, and per-page write affordances all adapt to role
+- [x] Residual advisor flags on `members_auth_insert` and `tee_times_*` are deliberate (both roles allowed); the wide-open `*_auth_all` policies are gone
 
 ### 3. Site-password cookie is trivially forgeable
 
@@ -70,12 +75,9 @@ Every push to `main` goes straight to production. Branch deploys would have caug
 - [ ] Confirm preview deploys are enabled in Vercel project settings (free)
 - [ ] Optionally: require a preview deploy before merging via branch protection
 
-### 9. Duplicate permissive SELECT policies on `membership_tiers`
+### 9. Duplicate permissive SELECT policies on `membership_tiers` — ✅ FIXED 2026-05-26 (as part of #2)
 
-Both `tiers_public_read` and `tiers_auth_all` apply to authenticated SELECT. Supabase evaluates both.
-
-- [ ] Drop `tiers_auth_all` from SELECT (keep it for INSERT/UPDATE/DELETE)
-- [ ] Or split `tiers_auth_all` into three separate policies
+`tiers_auth_all` was dropped entirely; replaced with three role-scoped policies (`tiers_admin_insert/update/delete`). Only `tiers_public_read` covers SELECT now. Supabase advisor confirms the duplicate is gone.
 
 ### 10. Eight unindexed foreign keys
 
