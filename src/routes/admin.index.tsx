@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useAuthSession, type Role } from "@/lib/admin-auth";
 import {
   countMembersByStatus,
   countRenewalsDueWithin,
@@ -21,13 +22,14 @@ export const Route = createFileRoute("/admin/")({
   component: AdminIndex,
 });
 
-type Module = { to: string; title: string; description: string };
+type Module = { to: string; title: string; description: string; requires?: Role };
 
 const MODULES: ReadonlyArray<Module> = [
   {
     to: "/admin/website",
     title: "Website",
     description: "Page titles, descriptions, and Open Graph tags across the public site.",
+    requires: "admin",
   },
   {
     to: "/admin/memberships",
@@ -74,6 +76,10 @@ function nextSevenBoundsISO() {
 }
 
 function AdminIndex() {
+  const auth = useAuthSession();
+  const role: Role = auth.role ?? "staff";
+  const isAdmin = role === "admin";
+
   const [activeMembers, setActiveMembers] = useState<number | null>(null);
   const [renewals, setRenewals] = useState<number | null>(null);
   const [bookingsToday, setBookingsToday] = useState<number | null>(null);
@@ -84,29 +90,31 @@ function AdminIndex() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (auth.status !== "authed") return;
     const today = todayBoundsISO();
     const week = nextSevenBoundsISO();
-    Promise.all([
-      countMembersByStatus("active"),
-      countRenewalsDueWithin(30),
-      countTeeTimesBetween(today.from, today.to),
-      countTeeTimesBetween(week.from, week.to),
-      sumExpensesBetween(firstDayOfMonth(), lastDayOfMonth()),
-      listTeeTimes({ from: today.from, to: today.to, includeCancelled: false }),
-      listMembers(),
-    ])
-      .then(([a, r, bt, bw, exp, list, mems]) => {
-        setActiveMembers(a);
-        setRenewals(r);
-        setBookingsToday(bt);
-        setBookingsWeek(bw);
-        setExpensesMonth(exp);
-        setTodayList(list);
-        setMembers(mems);
-      })
+
+    // Queries every role runs (each is RLS-safe for staff and admin).
+    const common: Promise<unknown>[] = [
+      countTeeTimesBetween(today.from, today.to).then(setBookingsToday),
+      countTeeTimesBetween(week.from, week.to).then(setBookingsWeek),
+      listTeeTimes({ from: today.from, to: today.to, includeCancelled: false }).then(setTodayList),
+      listMembers().then(setMembers),
+    ];
+
+    // Admin-only tiles.
+    const adminOnly: Promise<unknown>[] = isAdmin
+      ? [
+          countMembersByStatus("active").then(setActiveMembers),
+          countRenewalsDueWithin(30).then(setRenewals),
+          sumExpensesBetween(firstDayOfMonth(), lastDayOfMonth()).then(setExpensesMonth),
+        ]
+      : [];
+
+    Promise.all([...common, ...adminOnly])
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [auth.status, isAdmin]);
 
   const memberById = useMemo(() => {
     const m = new Map<string, Member>();
@@ -116,28 +124,38 @@ function AdminIndex() {
 
   const previewList = todayList.slice(0, TODAY_PREVIEW_LIMIT);
   const remaining = Math.max(0, todayList.length - TODAY_PREVIEW_LIMIT);
+  const visibleModules = MODULES.filter((m) => !m.requires || m.requires === role);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="font-display text-4xl text-foreground">Dashboard</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Today at a glance. Pick a module below to drill in.
+        {isAdmin ? "Today at a glance. Pick a module below to drill in." : "Today at a glance."}
       </p>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatTile
-          label="Active members"
-          value={activeMembers}
-          loading={loading}
-          to="/admin/members"
-        />
-        <StatTile
-          label="Renewals due (30d)"
-          value={renewals}
-          loading={loading}
-          to="/admin/members"
-          warn={(renewals ?? 0) > 0}
-        />
+      <section
+        className={
+          "mt-8 grid gap-3 " +
+          (isAdmin ? "sm:grid-cols-2 lg:grid-cols-5" : "sm:grid-cols-2 lg:grid-cols-2")
+        }
+      >
+        {isAdmin && (
+          <StatTile
+            label="Active members"
+            value={activeMembers}
+            loading={loading}
+            to="/admin/members"
+          />
+        )}
+        {isAdmin && (
+          <StatTile
+            label="Renewals due (30d)"
+            value={renewals}
+            loading={loading}
+            to="/admin/members"
+            warn={(renewals ?? 0) > 0}
+          />
+        )}
         <StatTile
           label="Bookings today"
           value={bookingsToday}
@@ -150,14 +168,28 @@ function AdminIndex() {
           loading={loading}
           to="/admin/tee-times"
         />
-        <StatTile
-          label="Expenses this month"
-          value={expensesMonth}
-          format="money"
-          loading={loading}
-          to="/admin/expenses"
-        />
+        {isAdmin && (
+          <StatTile
+            label="Expenses this month"
+            value={expensesMonth}
+            format="money"
+            loading={loading}
+            to="/admin/expenses"
+          />
+        )}
       </section>
+
+      {!isAdmin && (
+        <section className="mt-6">
+          <Link
+            to="/admin/expenses/$id"
+            params={{ id: "new" }}
+            className="inline-block bg-primary px-6 py-3 text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            + Add expense
+          </Link>
+        </section>
+      )}
 
       <section className="mt-10">
         <header className="flex items-baseline justify-between border-b border-input pb-3">
@@ -208,7 +240,7 @@ function AdminIndex() {
       <section className="mt-12">
         <h2 className="font-display text-xl text-foreground">Manage</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MODULES.map((m) => (
+          {visibleModules.map((m) => (
             <ModuleCard key={m.title} module={m} />
           ))}
         </div>

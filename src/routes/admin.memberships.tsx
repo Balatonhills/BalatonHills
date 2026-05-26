@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/lib/admin-auth";
 import { getSupabase } from "@/lib/supabase";
 import {
   deleteTier,
@@ -12,8 +13,74 @@ export const Route = createFileRoute("/admin/memberships")({
   head: () => ({
     meta: [{ title: "Memberships — Admin" }, { name: "robots", content: "noindex, nofollow" }],
   }),
-  component: MembershipsPage,
+  component: MembershipsRouter,
 });
+
+function MembershipsRouter() {
+  const isAdmin = useIsAdmin();
+  return isAdmin ? <MembershipsPage /> : <MembershipsReadOnly />;
+}
+
+function MembershipsReadOnly() {
+  const [tiers, setTiers] = useState<MembershipTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listAllTiers()
+      .then(setTiers)
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <main className="mx-auto max-w-3xl px-6 py-12">
+      <header className="border-b border-input pb-6">
+        <h1 className="font-display text-3xl text-foreground">Memberships</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Tier reference (read-only). Ask an admin to change anything.
+        </p>
+      </header>
+
+      {error && (
+        <p className="mt-6 text-sm text-red-700" role="alert">
+          {error}
+        </p>
+      )}
+
+      {loading ? (
+        <p className="mt-8 text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <div className="mt-8 space-y-6">
+          {tiers
+            .filter((t) => t.active)
+            .map((t) => (
+              <div key={t.id} className="border border-input p-6">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h2 className="font-display text-xl text-foreground">{t.name}</h2>
+                  {t.price_display && (
+                    <span className="text-xs uppercase tracking-[0.2em] text-gold">
+                      {t.price_display}
+                    </span>
+                  )}
+                </div>
+                {t.perks.length > 0 && (
+                  <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+                    {t.perks.map((p) => (
+                      <li key={p} className="flex gap-3">
+                        <span className="text-gold">—</span>
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+        </div>
+      )}
+    </main>
+  );
+}
 
 const NEW_TIER_ID = "__new__";
 

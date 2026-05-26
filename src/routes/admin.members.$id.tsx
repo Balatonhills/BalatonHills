@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/lib/admin-auth";
 import { listAllTiers, type MembershipTier } from "@/lib/membership-tiers";
 import {
   createMember,
@@ -70,6 +71,7 @@ function formToInput(f: FormState): MemberInput {
 function MemberEditPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
   const isNew = id === "new";
 
   const [tiers, setTiers] = useState<MembershipTier[]>([]);
@@ -257,7 +259,7 @@ function MemberEditPage() {
             >
               {saving ? "Saving…" : isNew ? "Create member" : "Save"}
             </button>
-            {!isNew && (
+            {!isNew && isAdmin && (
               <button
                 type="button"
                 onClick={onDelete}

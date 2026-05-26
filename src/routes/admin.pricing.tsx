@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/lib/admin-auth";
 import {
   COURSE_OPTIONS,
   createPricing,
@@ -71,6 +72,7 @@ function formToInput(f: FormState): PricingItemInput | null {
 }
 
 function PricingPage() {
+  const isAdmin = useIsAdmin();
   const [items, setItems] = useState<PricingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -157,16 +159,19 @@ function PricingPage() {
         <div>
           <h1 className="font-display text-3xl text-foreground">Pricing</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Internal rate sheet. {loading ? "Loading…" : `${items.length} items.`}
+            {isAdmin ? "Internal rate sheet" : "Rate sheet (read-only)"}.{" "}
+            {loading ? "Loading…" : `${items.length} items.`}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={startNew}
-          className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Add item
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={startNew}
+            className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Add item
+          </button>
+        )}
       </header>
 
       {error && (
@@ -185,14 +190,19 @@ function PricingPage() {
               <Th className="text-right">Amount</Th>
               <Th>Currency</Th>
               <Th>Active</Th>
-              <Th className="text-right">Actions</Th>
+              {isAdmin && <Th className="text-right">Actions</Th>}
             </tr>
           </thead>
           <tbody>
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                  No pricing items yet. Click "Add item" to create the first one.
+                <td
+                  colSpan={isAdmin ? 7 : 6}
+                  className="px-4 py-8 text-center text-muted-foreground"
+                >
+                  {isAdmin
+                    ? 'No pricing items yet. Click "Add item" to create the first one.'
+                    : "No pricing items yet."}
                 </td>
               </tr>
             )}
@@ -206,22 +216,24 @@ function PricingPage() {
                 </Td>
                 <Td>{p.currency}</Td>
                 <Td>{p.active ? "Yes" : "No"}</Td>
-                <Td className="text-right">
-                  <button
-                    type="button"
-                    onClick={() => startEdit(p)}
-                    className="mr-4 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(p)}
-                    className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                </Td>
+                {isAdmin && (
+                  <Td className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => startEdit(p)}
+                      className="mr-4 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(p)}
+                      className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </Td>
+                )}
               </tr>
             ))}
           </tbody>
