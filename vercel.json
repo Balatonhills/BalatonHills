@@ -4,5 +4,11 @@
   "outputDirectory": "dist/client",
   "framework": null,
   "rewrites": [{ "source": "/(.*)", "destination": "/api/ssr" }]
-  "rootDirectory": "legacy"
+ "builds": [
+    {
+      "src": "legacy/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "legacy/dist" }
+    }
+  ]
 }
