@@ -4,4 +4,5 @@
   "outputDirectory": "dist/client",
   "framework": null,
   "rewrites": [{ "source": "/(.*)", "destination": "/api/ssr" }]
+  "rootDirectory": "legacy"
 }
