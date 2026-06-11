@@ -3,91 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balaton Hills Golf Club</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <title>Vadrózsa Golf Club | Balaton, Hungary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0b130f;       /* Deep forest black */
-            --accent-gold: #c5a880;   /* Muted gold */
-            --text-light: #f4f4f4;    /* Off-white */
-            --text-muted: #8a958f;    /* Soft grey-green */
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 500px;
-        }
-
-        .logo-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.8rem;
-            font-weight: 600;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            line-height: 1.1;
-        }
-
-        .logo-subtitle {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.4em;
-            color: var(--accent-gold);
-            margin-top: 10px;
-            font-weight: 400;
-        }
-
-        .divider {
-            width: 40px;
-            height: 1px;
-            background-color: var(--accent-gold);
-            margin: 40px auto;
-            opacity: 0.5;
-        }
-
-        .status {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--text-muted);
-            font-weight: 300;
-        }
-
-        @media (max-width: 480px) {
-            .logo-title { font-size: 2.2rem; }
-        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        .hero-overlay { background: rgba(0, 0, 0, 0.4); }
     </style>
 </head>
-<body>
+<body class="bg-stone-50 text-stone-800 scroll-smooth">
 
-    <div class="container">
-        <div class="logo-area">
-            <div class="logo-title">Balaton Hills</div>
-            <div class="logo-subtitle">Golf Club</div>
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+           <a href="#home" class="flex items-center space-x-3 group">
+    <img src="images/logovr2b.png" alt="Vadrózsa Logo" class="h-10 w-auto object-contain transition-transform group-hover:scale-105">
+    <span class="text-xl font-bold tracking-tighter text-emerald-900 uppercase">Vadrózsa Golf Club</span>
+</a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium uppercase tracking-widest">
+                <a href="#home" class="hover:text-emerald-700 transition">Home</a>
+                <a href="#about" class="hover:text-emerald-700 transition">About</a>
+                <a href="#membership" class="hover:text-emerald-700 transition">Membership</a>
+                <a href="#booking" class="hover:text-emerald-700 transition">Book a Tee Time</a>
+                <a href="#contact" class="hover:text-emerald-700 transition">Contact</a>
+            </div>
         </div>
+    </nav>
 
-        <div class="divider"></div>
+    <!-- Hero Section -->
+    <section id="home" class="relative h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80&w=2070');">
+        <div class="absolute inset-0 hero-overlay"></div>
+        <div class="relative text-center text-white px-4">
+            <h1 class="text-5xl md:text-7xl mb-4">Vadrózsa Golf Club</h1>
+            <p class="text-xl md:text-2xl font-light mb-8 italic">9 Holes in the Heart of the Balaton Hills</p>
+            <a href="#booking" class="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-3 rounded-sm transition-all uppercase text-sm tracking-widest">Reserve Your Round</a>
+        </div>
+    </section>
 
-        <div class="status">Under Construction</div>
+    <!-- About Section -->
+    <section id="about" class="py-24 max-w-5xl mx-auto px-6 text-center">
+        <h2 class="text-4xl mb-8">The Course</h2>
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <img src="https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&q=80&w=1000" alt="Golf course green" class="rounded-lg shadow-xl">
+            <div class="text-left space-y-4">
+                <p class="leading-relaxed">
+                    Welcome to Vadrózsa, a premiere 9-hole golf destination nestled within the rolling hills of the Balaton region. Our course is designed to harmonize with the natural Hungarian landscape, offering both challenge and serenity.
+                </p>
+                <p class="leading-relaxed text-stone-500">
+                    Our course offers you the chance to play and enjoy the wonderful scenery of the Balaton Hills. You can come alone and pair up with other players, play on your own or bring a bigger group of friends and arrange a full day with the course all by yourselves. We can accomodate any food, beverage or other program requirements to arrange a perfect day for you all. Our Goal: To provide a sophisticated and personalized environment where every detail is managed so you can focus entirely on your game and the scenery.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Membership Section -->
+    <section id="membership" class="py-24 bg-stone-900 text-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl mb-4">Membership</h2>
+                <p class="text-stone-400">Join the Vadrózsa community and enjoy exclusive benefits.</p>
+            </div>
+          <div class="grid md:grid-cols-3 gap-8">
+    
+    <!-- Card 1: Full Member -->
+    <div class="flex flex-col border border-stone-700 p-8 hover:border-emerald-500 transition min-h-[400px]">
+        <h3 class="text-2xl mb-4">Full Member</h3>
+        <p class="text-stone-400 mb-6">360.000 HUF per year</p>
+        
+        <!-- This empty div grows to push the list to the bottom -->
+        <div class="flex-grow"></div>
+
+        <ul class="text-sm space-y-2 text-stone-300">
+            <li>• Unlimited access</li>
+            <li>• Member discounts</li>
+            <li>• Partnership discounts</li>
+        </ul>
     </div>
+
+    <!-- Card 2: Local Resident -->
+    <div class="flex flex-col border border-emerald-700 p-8 bg-stone-800 min-h-[400px]">
+        <h3 class="text-2xl mb-4">Daily Green Fee</h3>
+        <p class="text-stone-400 mb-6">A full day of play on the course</p>
+        
+        <div class="flex-grow"></div>
+
+        <ul class="text-sm space-y-2 text-stone-300">
+         <li>• Flexible play times</li>
+            <li>• Club house access</li>
+                        <li>• Option to rent equipment</li>
+        </ul>
+    </div>
+
+    <!-- Card 3: Transport package -->
+    <div class="flex flex-col border border-stone-700 p-8 hover:border-emerald-500 transition min-h-[400px]">
+        <h3 class="text-2xl mb-4">Transport package</h3>
+        <p class="text-stone-400 mb-6">Utilize our transportation service including pickup and return</p>
+        
+        <div class="flex-grow"></div>
+
+        <ul class="text-sm space-y-2 text-stone-300">
+          <li>• Prices from €100 from lake Balaton</li>
+                        <li>• Prices from €150 from Budapest</li>
+                        <li>• Contact us for booking</li>
+        </ul>
+    </div>
+</div>
+        </div>
+    </section>
+
+
+    <!-- Book a Tee Time -->
+    <section id="booking" class="py-24 bg-stone-100/50 border-y border-stone-200">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-4xl mb-4">Book a Tee Time</h2>
+                <p class="text-stone-600">Experience the premium tranquility of the Balaton hills. Select your preferred date and tee time instantly below using our live reservation calendar.</p>
+            </div>
+            
+            <div class="bg-white border border-stone-200 rounded-xl shadow-xl overflow-hidden grid lg:grid-cols-4">
+                <!-- Left Sidebar Club Info Panel -->
+                <div class="bg-emerald-950 p-8 text-white flex flex-col justify-between lg:col-span-1">
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold">Reservations</span>
+                        <h3 class="text-2xl mt-2 mb-6 font-serif">Club Guidelines</h3>
+                        <ul class="space-y-4 text-sm text-stone-300">
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Standard intervals are 30 minutes apart.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Cancellations allowed up to 24 hours prior.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-emerald-400 mr-2">✓</span> Dress code: Proper golf attire required.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-emerald-800 text-xs text-stone-400">
+                        Need group custom event hosting or equipment rentals? <br>
+                        <a href="#contact" class="text-emerald-400 underline hover:text-emerald-300 transition">Contact us</a>
+                    </div>
+                </div>
+
+                <!-- Live Koalendar Embed Area -->
+                <div class="lg:col-span-3 p-4 bg-stone-50 min-h-[650px] flex flex-col justify-center">
+                    <!-- Koalendar Inline Embed Start -->
+                    <div id="inline-widget-tee-times-vadrozsa" class="w-full h-full"></div>
+                    <script>window.Koalendar=window.Koalendar||function(){(Koalendar.props=Koalendar.props||[]).push(arguments)};</script>
+                    <script async src="https://koalendar.com/assets/widget.js"></script>
+                    <script>Koalendar('inline', {"url":"https://koalendar.com/e/tee-times-vadrozsa","selector":"#inline-widget-tee-times-vadrozsa"});</script>
+                    <!-- Koalendar Inline Embed End -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <!-- Contact Section -->
+<section id="contact" class="py-24 bg-stone-100">
+    <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-4xl mb-12 text-center">Contact Us</h2>
+        
+        <!-- Grid Container: 3 Columns on large screens, 1 on mobile -->
+        <div class="grid lg:grid-cols-3 gap-12 items-start">
+            
+            <!-- Column 1: Info -->
+            <div class="space-y-6">
+                <h3 class="text-2xl font-semibold text-emerald-900">Get in Touch</h3>
+                <p class="text-stone-600">Have questions about the course or our facilities? Reach out to our team.</p>
+                <div class="space-y-4 text-sm">
+                    <p><strong>Address:</strong> Nagymező út 33-34, 8246 Tótvázsony, Hungary</p>
+                    <p><strong>Phone:</strong> +36 [Your Phone Number]</p>
+                    <p><strong>Email:</strong> info@balatonhills.com</p>
+                </div>
+            </div>
+
+            <!-- Column 2: The Map -->
+            <div class="h-80 lg:h-full min-h-[350px] rounded-xl overflow-hidden shadow-md border border-white">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2729.474023769947!2d17.771391512398516!3d47.00543632943265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476998a78ce2276b%3A0x140d358c449c1e1!2zVmFkcsOzenNhIEdvbGYgQ2x1Yg!5e0!3m2!1sen!2shu!4v1715518000000!5m2!1sen!2shu" 
+        width="100%" 
+        height="100%" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+            </div>
+
+<!-- Column 3: The Form (Formspree Integration) -->
+<form action="https://formspree.io/f/maqkblvv" method="POST" class="space-y-4 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between">
+    <div>
+        <!-- Notice the added 'name="..."' attributes. These tell the email what data it is receiving! -->
+        <input type="text" name="name" required placeholder="Name" class="w-full mb-4 p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        
+        <input type="email" name="email" required placeholder="Email" class="w-full mb-4 p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        
+        <textarea name="message" required placeholder="Message" rows="4" class="w-full p-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+    </div>
+    <button type="submit" class="w-full bg-emerald-900 text-white py-3 rounded-lg uppercase tracking-widest text-xs hover:bg-emerald-800 transition-colors mt-4">
+        Send Message
+    </button>
+</form>
+            
+        </div>
+    </div>
+</section>
+
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-stone-200 text-center text-stone-500 text-sm">
+        <p>&copy; 2026 Balaton Hills Golf Club. All Rights Reserved.</p>
+    </footer>
 
 </body>
 </html>
