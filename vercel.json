@@ -1,13 +1,16 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
       "source": "/vadrozsa",
-      "destination": "https://vadrozsa.vercel.app/"
+      "destination": "https://vadrozsa.vercel.app"
     },
     {
       "source": "/vadrozsa/:path*",
       "destination": "https://vadrozsa.vercel.app/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/ssr"
     }
   ]
 }
