@@ -4,9 +4,11 @@
   "outputDirectory": "dist/client",
   "framework": null,
   "rewrites": [
+    { "source": "/", "destination": "/vadrozsa/index.html" },
     { "source": "/vadrozsa", "destination": "/vadrozsa/index.html" },
     { "source": "/vadrozsa/", "destination": "/vadrozsa/index.html" },
-    { "source": "/(.*)", "destination": "/api/ssr" }
+    { "source": "/admin", "destination": "/api/ssr" },
+    { "source": "/admin/(.*)", "destination": "/api/ssr" }
   ],
   "headers": [
     {
