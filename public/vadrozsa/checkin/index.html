@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Check-In | Vadrózsa</title>
+    <style>
+        :root {
+            --primary: #1e3f20; /* Deep Golf Green */
+            --background: #f4f7f5;
+            --text: #2d3748;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background-color: var(--background); 
+            color: var(--text); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 450px; 
+            margin-bottom: 20px;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .logo-container img {
+            max-height: 70px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        h2 { color: var(--primary); margin-bottom: 8px; text-align: center; font-size: 24px; }
+        p.subtitle { text-align: center; font-size: 14px; color: #718096; margin-bottom: 25px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 16px; transition: border 0.2s; background-color: white; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        .row { display: flex; gap: 15px; }
+        .row .form-group { flex: 1; }
+        
+        /* Smooth styling for the dynamically added player fields */
+        .dynamic-player {
+            background: #f8faf9;
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border-radius: 0 6px 6px 0;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        button { 
+            width: 100%; 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: background 0.2s; 
+        }
+        button:hover { background: #142b16; }
+        
+        .success-msg { display: none; text-align: center; padding: 20px 0; }
+        .success-msg h3 { color: var(--primary); margin-bottom: 10px; }
+
+        footer {
+            font-size: 12px;
+            color: #a0aec0;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="logo-container">
+        <img src="images/logovr2b.png" alt="Balaton Hills Logo">
+    </div>
+
+    <div id="form-container">
+        <h2>Vadrózsa Golf Club</h2>
+        <p class="subtitle">Please check in before heading to the 1st tee</p>
+        
+        <form id="checkinForm" action="https://formspree.io/f/xykagoen" method="POST" onsubmit="handleCheckin(event)">
+            <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input type="text" id="firstName" name="First Name" required autocomplete="given-name">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input type="text" id="lastName" name="Last Name" required autocomplete="family-name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="Email" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" name="Phone" required autocomplete="tel">
+            </div>
+            
+            <div class="form-group">
+                <label for="playerCount">Number of Players *</label>
+                <select id="playerCount" name="Total Players" required onchange="updatePlayerFields()">
+                    <option value="1" selected>1 Player</option>
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                </select>
+            </div>
+
+            <div id="extra-players-container"></div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="playDate">Date of Play *</label>
+                    <input type="date" id="playDate" name="Date of Play" required>
+                </div>
+                <div class="form-group">
+                    <label for="startTime">Start Time (24h) *</label>
+                    <input type="time" id="startTime" name="Start Time" required>
+                </div>
+            </div>
+            
+            <button type="submit">Confirm Arrival & Play</button>
+        </form>
+    </div>
+
+    <div id="success-container" class="success-msg">
+        <h3>✓ Check-In Confirmed</h3>
+        <p>Thank you! Your arrival has been logged. Have a great round!</p>
+    </div>
+</div>
+
+<footer>
+    © 2026 Balaton Hills. All Rights Reserved.
+</footer>
+
+<script>
+    // Pre-fill current local date and 24-hour time
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    document.getElementById('playDate').value = `${year}-${month}-${day}`;
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('startTime').value = `${hours}:${minutes}`;
+
+    // Function to add or remove mandatory input fields for additional players
+    function updatePlayerFields() {
+        const container = document.getElementById('extra-players-container');
+        const count = parseInt(document.getElementById('playerCount').value);
+        
+        // Clear out existing fields
+        container.innerHTML = '';
+        
+        // Loop starts at 2 because Player 1 is the main contact above
+        for (let i = 2; i <= count; i++) {
+            const playerGroup = document.createElement('div');
+            playerGroup.className = 'form-group dynamic-player';
+            
+            playerGroup.innerHTML = `
+                <label for="player${i}">Full Name of Player ${i} *</label>
+                <input type="text" id="player${i}" name="Player ${i} Name" placeholder="Enter full name" required>
+            `;
+            container.appendChild(playerGroup);
+        }
+    }
+
+    function handleCheckin(event) {
+        event.preventDefault();
+        const form = document.getElementById('checkinForm');
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+        }).then(response => {
+            if (response.ok) {
+                document.getElementById('form-container').style.display = 'none';
+                document.getElementById('success-container').style.display = 'block';
+            } else {
+                alert("Something went wrong. Please try checking in again.");
+            }
+        }).catch(error => {
