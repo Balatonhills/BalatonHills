@@ -28,13 +28,9 @@ Two roles introduced (`staff` + `admin`), stored in `auth.users.app_metadata.rol
 - [x] UI: top nav, dashboard, and per-page write affordances all adapt to role
 - [x] Residual advisor flags on `members_auth_insert` and `tee_times_*` are deliberate (both roles allowed); the wide-open `*_auth_all` policies are gone
 
-### 3. Site-password cookie is trivially forgeable
+### 3. Site-password cookie is trivially forgeable — ✅ MOOT 2026-06-01
 
-[api/ssr.mjs:7-8](api/ssr.mjs#L7-L8) sets cookie `site_unlocked=1`. Anyone can paste `document.cookie="site_unlocked=1"` and skip the gate.
-
-- [ ] Replace literal `"1"` with an HMAC over `SITE_PASSWORD` (or a long random token derived at boot)
-- [ ] Verify HMAC on each request in `shouldBypassGate`
-- [ ] Acceptable to keep this lightweight; it's "coming soon", not real security
+Gate removed entirely (site launched publicly). All SITE_PASSWORD code stripped from api/ssr.mjs and the env var unset on Vercel. Nothing to forge.
 
 ### 4. No double-submit guard on form saves
 
