@@ -1,16 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/vadrozsa/:path*",
-      "destination": "https://vadrozsa.vercel.app/:path*"
-    },
-    {
-      "source": "/vadrozsa",
-      "destination": "https://vadrozsa.vercel.app/"
-    },
-    {
-      "source": "/(?!vadrozsa)(.*)",
-      "destination": "/api/ssr"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/ssr" }]
 }
