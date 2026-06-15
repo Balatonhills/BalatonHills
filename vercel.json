@@ -8,10 +8,6 @@
     {
       "source": "/vadrozsa/:path*",
       "destination": "https://vadrozsa.vercel.app/:path*"
-    },
-    { 
-      "source": "/(.*)", 
-      "destination": "/api/ssr" 
     }
   ]
 }
