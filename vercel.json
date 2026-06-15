@@ -1,19 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/vadrozsa",
-      "destination": "https://vadrozsa.vercel.app/"
-    },
-    {
       "source": "/vadrozsa/:path*",
       "destination": "https://vadrozsa.vercel.app/:path*"
     },
     {
-      "source": "/vadrozsa/(.*)",
-      "destination": "https://vadrozsa.vercel.app/$1"
+      "source": "/vadrozsa",
+      "destination": "https://vadrozsa.vercel.app/"
     },
     {
-      "source": "/((?!vadrozsa).*)",
+      "source": "/(?!vadrozsa)(.*)",
       "destination": "/api/ssr"
     }
   ]
