@@ -82,11 +82,43 @@
             </div>
             
             <div class="grid md:grid-cols-3 gap-8 items-stretch">
-                <!-- Card 1: Full Member -->
+                <!-- Card 1: Annual Membership (2027 price list) -->
                 <div class="flex flex-col justify-between border border-stone-700 p-8 hover:border-emerald-500 transition-all rounded-sm bg-stone-900/50 min-h-[460px]">
                     <div>
-                        <h3 class="text-2xl mb-2 font-serif">Full Member</h3>
-                        <p class="text-xl font-semibold text-emerald-400 mb-6">360.000 HUF <span class="text-xs text-stone-400 font-normal">/ year</span></p>
+                        <h3 class="text-2xl mb-1 font-serif">Annual Membership</h3>
+                        <p class="text-xs text-stone-400 mb-6">2027 season · lower rate if paid by 31 Dec 2026</p>
+
+                        <!-- Early / regular rate matrix -->
+                        <div class="border-t border-stone-800 pt-4 mb-4 text-sm">
+                            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-2 items-baseline">
+                                <span></span>
+                                <span class="text-[10px] uppercase tracking-wider text-stone-400 text-right">by 31 Dec 2026</span>
+                                <span class="text-[10px] uppercase tracking-wider text-stone-400 text-right">from 1 Jan 2027</span>
+
+                                <span class="text-stone-200">Full</span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">249&nbsp;000&nbsp;Ft</span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">299&nbsp;000&nbsp;Ft</span>
+
+                                <span class="text-stone-200">Senior <span class="text-xs text-stone-400">(over 70)</span></span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">174&nbsp;300&nbsp;Ft</span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">209&nbsp;300&nbsp;Ft</span>
+
+                                <span class="text-stone-200">Couples <span class="text-xs text-stone-400">(per person)</span></span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">174&nbsp;300&nbsp;Ft</span>
+                                <span class="font-semibold text-emerald-400 text-right whitespace-nowrap">209&nbsp;300&nbsp;Ft</span>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-stone-800 space-y-2">
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-stone-200">Junior <span class="text-xs text-stone-400">(under 18)</span></span>
+                                    <span class="font-semibold text-emerald-400 whitespace-nowrap">99&nbsp;000&nbsp;Ft</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-stone-200">Footgolf <span class="text-xs text-stone-400">(18 holes)</span></span>
+                                    <span class="font-semibold text-emerald-400 whitespace-nowrap">120&nbsp;000&nbsp;Ft</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <ul class="text-sm space-y-3 text-stone-300 border-t border-stone-800 pt-4">
                             <li class="flex items-center"><span class="text-emerald-500 mr-2">•</span> Unlimited seasonal course access</li>
                             <li class="flex items-center"><span class="text-emerald-500 mr-2">•</span> Exclusive member-only tournaments</li>
@@ -107,18 +139,23 @@
                         <div class="space-y-3 border-t border-stone-700 pt-4 mb-6">
                             <div class="flex justify-between items-center bg-stone-900/40 px-3 py-2.5 rounded-sm">
                                 <span class="text-sm font-medium text-stone-200">9 Holes Plan</span>
-                                <span class="text-md font-semibold text-emerald-400">19.000 HUF</span>
+                                <span class="text-md font-semibold text-emerald-400 whitespace-nowrap">12&nbsp;900&nbsp;Ft</span>
                             </div>
                             <div class="flex justify-between items-center bg-stone-900/40 px-3 py-2.5 rounded-sm">
                                 <span class="text-sm font-medium text-stone-200 flex items-center">
                                     18 Holes Plan
                                     <span class="ml-1.5 text-[9px] bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-1 py-0.5 rounded-sm font-sans tracking-tight">2x Loop</span>
                                 </span>
-                                <span class="text-md font-semibold text-emerald-400">29.000 HUF</span>
+                                <span class="text-md font-semibold text-emerald-400 whitespace-nowrap">18&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-stone-900/40 px-3 py-2.5 rounded-sm">
+                                <span class="text-sm font-medium text-stone-200">Footgolf <span class="text-xs text-stone-400">(18 holes)</span></span>
+                                <span class="text-md font-semibold text-emerald-400 whitespace-nowrap">10&nbsp;000&nbsp;Ft</span>
                             </div>
                         </div>
 
                         <ul class="text-xs space-y-2 text-stone-300 px-1">
+                            <li class="flex items-center"><span class="text-emerald-400 mr-2">✓</span> Juniors receive 50% off green fees</li>
                             <li class="flex items-center"><span class="text-emerald-400 mr-2">✓</span> Play alone or with a group</li>
                             <li class="flex items-center"><span class="text-emerald-400 mr-2">✓</span> Premium rental sets available</li>
                         </ul>
@@ -140,6 +177,62 @@
                     <a href="#contact" class="w-full mt-8 border border-stone-600 hover:border-white text-center py-2.5 text-xs uppercase tracking-widest transition-colors">Inquire Now</a>
                 </div>
             </div>
+
+            <!-- Rentals, carts & storage (2027 price list) -->
+            <div class="mt-16 border border-stone-700 rounded-sm bg-stone-900/50 p-8">
+                <h3 class="text-2xl mb-6 font-serif text-center">Rentals, Carts &amp; Storage</h3>
+                <div class="grid md:grid-cols-3 gap-8 text-sm">
+                    <div>
+                        <h4 class="text-xs uppercase tracking-widest text-stone-400 mb-3">Equipment Rental</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">Full club set with bag <span class="text-xs text-stone-400">(10 clubs)</span></span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">9&nbsp;900&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">Trolley <span class="text-xs text-stone-400">(free for members)</span></span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">1&nbsp;000&nbsp;Ft</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs uppercase tracking-widest text-stone-400 mb-3">Electric Golf Cart</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">9 holes</span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">10&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">18 holes</span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">20&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">18 holes, club members</span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">10&nbsp;000&nbsp;Ft</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs uppercase tracking-widest text-stone-400 mb-3">Storage &amp; Services</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">Club set storage <span class="text-xs text-stone-400">(yearly)</span></span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">30&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">Own cart storage &amp; charging <span class="text-xs text-stone-400">(yearly)</span></span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">100&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <span class="text-stone-200">Handicap handling</span>
+                                <span class="font-semibold text-emerald-400 whitespace-nowrap">50&nbsp;000&nbsp;Ft</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-8 text-center text-xs text-stone-400">All prices are gross and include VAT. 2027 price list.</p>
         </div>
     </section>
 
